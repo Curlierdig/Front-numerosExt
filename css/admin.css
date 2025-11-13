@@ -1,0 +1,88 @@
+:root {
+  --chihuahua-blue-dark: #0b3c5d;
+  --chihuahua-blue-light: #328cc1;
+  --chihuahua-gray: #f8f9fa;
+}
+
+body {
+  font-family: "Montserrat", sans-serif;
+  background-color: var(--chihuahua-gray);
+}
+
+.wrapper {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  background-color: var(--chihuahua-blue-dark);
+  transition: all 0.3s;
+}
+
+.sidebar .sidebar-header {
+  padding: 1.5rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar .sidebar-header .logo-img {
+  max-width: 60px;
+  margin-bottom: 0.5rem;
+}
+
+.sidebar .nav-link {
+  color: rgba(255, 255, 255, 0.8);
+  padding: 0.8rem 1.5rem;
+  font-weight: 500;
+}
+
+.sidebar .nav-link:hover {
+  color: #fff;
+  background-color: var(--chihuahua-blue-light);
+}
+
+.sidebar .nav-link.active {
+  color: #fff;
+  background-color: var(--chihuahua-blue-light);
+}
+
+.main-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.top-navbar {
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid #dee2e6;
+}
+
+/* Estilo para los botones de DataTables */
+.dt-buttons .btn {
+  background-color: var(--chihuahua-blue-dark);
+  color: white;
+  border: none;
+}
+.dt-buttons .btn:hover {
+  background-color: var(--chihuahua-blue-light);
+}
+
+/* Modal Header */
+.modal-header {
+  background-color: var(--chihuahua-blue-dark);
+  color: white;
+}
+
+/* Media query para ocultar la sidebar en móvil */
+@media (max-width: 768px) {
+  .sidebar {
+    margin-left: -260px;
+  }
+  .sidebar.active {
+    margin-left: 0;
+  }
+}

@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Plataforma de Denuncia Ciudadana | SSPE Chihuahua</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+
+    <link href="../css/style.css" rel="stylesheet" />
+    <style>
+      :root {
+        --chihuahua-blue-dark: #0b3c5d;
+        --chihuahua-blue-light: #328cc1;
+        --chihuahua-gray: #f0f2f5;
+        --bs-primary: var(--chihuahua-blue-dark);
+        --bs-primary-rgb: 11, 60, 93;
+      }
+
+      body {
+        font-family: "Montserrat", sans-serif;
+        background-color: #fff;
+      }
+
+      .header-main {
+        background-color: var(--chihuahua-blue-dark);
+      }
+
+      .navbar-brand img {
+        max-height: 45px;
+      }
+
+      .hero-section {
+        background-image: linear-gradient(rgba(11, 60, 93, 0.7), rgba(11, 60, 93, 0.7)), url("https://via.placeholder.com/1920x600.png?text=Centro+de+Mando+-+Chihuahua");
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 6rem 0;
+      }
+
+      .hero-section h1 {
+        font-weight: 700;
+      }
+
+      .section-title {
+        font-weight: 700;
+        color: var(--chihuahua-blue-dark);
+      }
+
+      .feature-icon {
+        font-size: 3rem;
+        color: var(--chihuahua-blue-light);
+      }
+
+      .table-hover tbody tr:hover {
+        background-color: var(--chihuahua-gray);
+      }
+
+      .footer-dark {
+        background-color: #343a40;
+        color: white;
+      }
+
+      .modal-header {
+        background-color: var(--chihuahua-blue-dark);
+        color: white;
+      }
+
+      .btn-primary {
+        background-color: var(--chihuahua-blue-dark);
+        border: none;
+      }
+      .btn-primary:hover {
+        background-color: var(--chihuahua-blue-light);
+      }
+      .logo-container {
+        background-color: white;
+        padding: 0.5rem;
+        border-radius: 8px;
+      }
+
+      .logo-container img {
+        max-height: 35px;
+      }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <header class="header-main text-white py-2">
+      <div class="container d-flex justify-content-between align-items-center">
+        <a class="navbar-brand" href="#">
+          <div class="logo-container d-flex align-items-center">
+            <img src="../images/logo-chihuahua.png" alt="Logo Gobierno del Estado de Chihuahua" class="me-3" />
+            <img src="../images/sspe logo.png" alt="Logo SSPE" />
+          </div>
+        </a>
+        <div class="text-end d-none d-lg-block">
+          <span class="fw-bold">PLATAFORMA ESTATAL</span><br />
+          <span>Secretaría de Seguridad Pública del Estado</span>
+        </div>
+      </div>
+    </header>
+
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--chihuahua-blue-light)">
+      <div class="container">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item"><a class="nav-link active" href="#">Inicio</a></li>
+            <li class="nav-item"><a class="nav-link" href="#denuncia">Denuncia Aquí</a></li>
+            <li class="nav-item"><a class="nav-link" href="#lista-numeros">Lista de Números</a></li>
+            <li class="nav-item"><a class="nav-link" href="../front/consejos.html">Consejos de Seguridad</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <section class="hero-section text-center">
+      <div class="container">
+        <h1 class="display-4">Protege a tu comunidad.</h1>
+        <p class="lead my-4">Denuncia de forma anónima números de extorsión, fraude y acoso. Tu reporte es confidencial y ayuda a prevenir delitos.</p>
+        <a href="#denuncia" class="btn btn-light btn-lg"> <i class="bi bi-shield-check me-2"></i>Hacer un reporte ahora </a>
+      </div>
+    </section>
+
+    <main class="container my-5">
+      <section id="como-funciona" class="text-center py-5">
+        <h2 class="section-title mb-4">Un Proceso Sencillo y Seguro</h2>
+        <div class="row">
+          <div class="col-md-4 mb-4">
+            <div class="feature-icon mb-3"><i class="bi bi-telephone-plus"></i></div>
+            <h5 class="fw-bold">1. Ingresa el Número</h5>
+            <p>Proporciona el número telefónico que deseas reportar y los detalles del incidente.</p>
+          </div>
+          <div class="col-md-4 mb-4">
+            <div class="feature-icon mb-3"><i class="bi bi-file-earmark-text"></i></div>
+            <h5 class="fw-bold">2. Describe la Situación</h5>
+            <p>Añade una breve descripción sobre el tipo de llamada: extorsión, fraude, acoso, etc.</p>
+          </div>
+          <div class="col-md-4 mb-4">
+            <div class="feature-icon mb-3"><i class="bi bi-lock"></i></div>
+            <h5 class="fw-bold">3. Envía de Forma Anónima</h5>
+            <p>Tu reporte es confidencial. La información se procesa para análisis y prevención.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="denuncia" class="text-center py-5" style="background-color: var(--chihuahua-gray); border-radius: 15px">
+        <h2 class="section-title">Inicia tu Reporte Ciudadano</h2>
+        <p class="mt-3 mb-4">Tu participación es clave para construir un Chihuahua más seguro.</p>
+        <button type="button" class="btn btn-primary btn-lg" id="btn-iniciar-reporte"><i class="bi bi-pencil-square me-2"></i>Llenar Formulario de Denuncia</button>
+      </section>
+
+      <section id="lista-numeros" class="py-5">
+        <h2 class="section-title text-center mb-4">Números Reportados Recientemente</h2>
+        <div class="table-responsive">
+          <table class="table table-hover table-striped text-center">
+            <thead class="table-dark">
+              <tr>
+                <th>Número Reportado</th>
+                <th>Categoría Principal</th>
+                <th>Fecha del Reporte</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>123-456-7890</td>
+                <td>Extorsión</td>
+                <td>01/06/2024</td>
+              </tr>
+              <tr>
+                <td>098-765-4321</td>
+                <td>Acoso</td>
+                <td>02/06/2024</td>
+              </tr>
+              <tr>
+                <td>555-555-5555</td>
+                <td>Fraude</td>
+                <td>03/06/2024</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="text-center mt-4">
+          <a href="../front/incidencias.html" class="btn btn-outline-primary">Ver la Lista Completa</a>
+        </div>
+      </section>
+    </main>
+
+    <div class="modal fade" id="adminReporteModal" tabindex="-1" aria-labelledby="adminWizardModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <div>
+              <h5 class="modal-title" id="adminWizardModalLabel">Registro de Reporte</h5>
+              <p class="mb-0 small">Completa los pasos para registrar un reporte.</p>
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+
+          <div class="modal-body">
+            <!-- Parte 1 -->
+            <form id="wizardForm">
+              <div id="step1">
+                <h6 class="mb-3">Datos Generales</h6>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="nombre" class="form-label">Nombre</label>
+                    <input type="text" class="form-control" id="nombre" required />
+                  </div>
+                  <div class="col-md-3 mb-3">
+                    <label for="edad" class="form-label">Edad</label>
+                    <input type="number" class="form-control" id="edad" min="1" max="100" />
+                  </div>
+                  <div class="col-md-3 mb-3">
+                    <label for="sexo" class="form-label">Sexo</label>
+                    <select id="sexo" class="form-select">
+                      <option selected disabled>Seleccionar...</option>
+                      <option>Hombre</option>
+                      <option>Mujer</option>
+                      <option>Otro</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="numero" class="form-label">Número</label>
+                    <input type="tel" class="form-control" id="numero" placeholder="614 123 4567" />
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="correo" class="form-label">Correo</label>
+                    <input type="email" class="form-control" id="correo" placeholder="ejemplo@correo.com" />
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="municipio" class="form-label">Municipio</label>
+                    <select class="form-select" id="municipio">
+                      <option selected disabled>Seleccionar...</option>
+                      <option>Aldama</option>
+                      <option>Chihuahua</option>
+                      <option>Parral</option>
+                      <option>Delicias</option>
+                      <option>Juárez</option>
+                      <option>Camargo</option>
+                      <option>Cuauhtémoc</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="entidadForanea" class="form-label">Entidad Foránea <span class="text-muted small">(Opcional)</span></label>
+                    <input type="text" class="form-control" id="entidadForanea" value="Chihuahua" />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Parte 2  -->
+              <div id="step2" style="display: none">
+                <h6 class="mb-3">Gestión de Reporte</h6>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="adminNumero" class="form-label">Número reportado</label>
+                    <input type="tel" class="form-control" id="adminNumero" value="614 123 4567" />
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="adminCategoria" class="form-label">Categoría</label>
+                    <select class="form-select" id="adminCategoria">
+                      <option>Extorsión</option>
+                      <option>Fraude</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="adminMedioContacto" class="form-label">Medio de contacto</label>
+                    <select class="form-select" id="adminMedioContacto">
+                      <option value="llamada">Llamada</option>
+                      <option value="otro">Otro</option>
+                    </select>
+                  </div>
+                  <div id="otroMedioContainer" class="mb-3" style="display: none">
+                    <label for="otroMedio" class="form-label">Especificar otro medio</label>
+                    <input type="text" id="otroMedio" class="form-control" placeholder="Escribe el medio de contacto" />
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="adminDescripcion" class="form-label">Descripción</label>
+                  <textarea class="form-control" id="adminDescripcion" rows="3"></textarea>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="adminSupuestoGenero" class="form-label">Supuesto Genero (Opcional)</label>
+                    <select id="adminSupuestoGenero" class="form-select">
+                      <option>Seleccionar...</option>
+                      <option>Hombre</option>
+                      <option>Mujer</option>
+                      <option>Otro</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="adminSupuestoNombre" class="form-label">Supuesto Nombre (Opcional)</label>
+                    <input type="text" class="form-control" id="adminSupuestoNombre" />
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="adminSupuestoTrabajo" class="form-label">Supuesto Trabajo (Opcional)</label>
+                    <input type="text" class="form-control" id="adminSupuestoTrabajo" />
+                  </div>
+                </div>
+
+                <fieldset class="form-section">
+                  <legend>Información de Destino (Fraudes)</legend>
+                  <div class="row">
+                    <div class="col-md-12 mb-3">
+                      <label for="adminTipoDestino" class="form-label">Tipo de Destino</label>
+                      <select class="form-select" id="adminTipoDestino">
+                        <option selected disabled>Seleccionar...</option>
+                        <option>Tarjeta</option>
+                        <option>Ubicación</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div id="tarjetaContainer" style="display: none">
+                    <div class="mb-3">
+                      <label for="adminNumeroTarjeta" class="form-label">Número de Tarjeta (16 dígitos)</label>
+                      <input type="text" class="form-control" id="adminNumeroTarjeta" inputmode="numeric" maxlength="16" placeholder="Solo números" />
+                    </div>
+                  </div>
+
+                  <div id="ubicacionContainer" style="display: none">
+                    <div class="mb-3">
+                      <label for="adminDireccion" class="form-label">Dirección o Ubicación</label>
+                      <textarea class="form-control" id="adminDireccion" rows="2" placeholder="Ubicación"></textarea>
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+
+              <div class="modal-footer">
+                <button type="button" id="prevBtn" class="btn btn-secondary" style="display: none">Atrás</button>
+                <button type="button" id="nextBtn" class="btn btn-light">Siguiente</button>
+                <button type="submit" id="saveBtn" class="btn btn-light" style="display: none">Guardar Cambios</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer-dark pt-5 pb-4">
+      <div class="container text-center text-md-start">
+        <div class="row">
+          <div class="col-md-6 col-lg-4 mx-auto mb-4">
+            <h6 class="text-uppercase fw-bold">Gobierno del Estado de Chihuahua</h6>
+            <hr class="mb-4 mt-0 d-inline-block mx-auto" style="width: 60px; background-color: var(--chihuahua-blue-light); height: 2px" />
+            <p>Trabajando juntos por un estado más seguro y justo para todos.</p>
+          </div>
+          <div class="col-md-6 col-lg-4 mx-auto mb-4">
+            <h6 class="text-uppercase fw-bold">Contacto de Emergencia y Denuncia</h6>
+            <hr class="mb-4 mt-0 d-inline-block mx-auto" style="width: 60px; background-color: var(--chihuahua-blue-light); height: 2px" />
+            <p><i class="bi bi-telephone-fill me-3"></i> Emergencias: 911</p>
+            <p><i class="bi bi-shield-lock-fill me-3"></i> Denuncia Anónima: 089</p>
+          </div>
+        </div>
+      </div>
+      <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2)">© 2025 Secretaría de Seguridad Pública del Estado de Chihuahua.</div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="../js/index.js"></script>
+    <script src="../js/modal.js"></script>
+  </body>
+</html>

@@ -1,0 +1,244 @@
+{
+  "data": [
+    {
+      "numero": "614-123-4567",
+      "categoria": "Extorsión",
+      "medio": "Llamada",
+      "fecha": "2025-10-14"
+    },
+    {
+      "numero": "656-987-6543",
+      "categoria": "Fraude",
+      "medio": "WhatsApp",
+      "fecha": "2025-10-13"
+    },
+    {
+      "numero": "639-555-1234",
+      "categoria": "Acoso",
+      "medio": "SMS",
+      "fecha": "2025-10-12"
+    },
+    {
+      "numero": "625-111-2233",
+      "categoria": "Extorsión",
+      "medio": "Llamada",
+      "fecha": "2025-10-11"
+    },
+    {
+      "numero": "614-333-4455",
+      "categoria": "Fraude",
+      "medio": "Llamada",
+      "fecha": "2025-10-10"
+    },
+    {
+      "numero": "656-777-8899",
+      "categoria": "Venta Engañosa",
+      "medio": "WhatsApp",
+      "fecha": "2025-10-09"
+    },
+    {
+      "numero": "627-241-9876",
+      "categoria": "Cobranza Agresiva",
+      "medio": "Llamada",
+      "fecha": "2025-10-08"
+    },
+    {
+      "numero": "648-512-3456",
+      "categoria": "Spam Telefónico",
+      "medio": "SMS",
+      "fecha": "2025-10-07"
+    },
+    {
+      "numero": "614-987-1234",
+      "categoria": "Extorsión",
+      "medio": "Telegram",
+      "fecha": "2025-10-06"
+    },
+    {
+      "numero": "656-321-7654",
+      "categoria": "Fraude",
+      "medio": "WhatsApp",
+      "fecha": "2025-10-05"
+    },
+    {
+      "numero": "639-876-2345",
+      "categoria": "Acoso",
+      "medio": "Llamada",
+      "fecha": "2025-10-04"
+    },
+    {
+      "numero": "625-345-8765",
+      "categoria": "Venta Engañosa",
+      "medio": "SMS",
+      "fecha": "2025-10-03"
+    },
+    {
+      "numero": "614-456-9870",
+      "categoria": "Fraude",
+      "medio": "WhatsApp",
+      "fecha": "2025-10-02"
+    },
+    {
+      "numero": "656-654-3210",
+      "categoria": "Cobranza Agresiva",
+      "medio": "Llamada",
+      "fecha": "2025-10-01"
+    },
+    {
+      "numero": "627-789-4561",
+      "categoria": "Extorsión",
+      "medio": "Llamada",
+      "fecha": "2025-09-30"
+    },
+    {
+      "numero": "648-901-2345",
+      "categoria": "Spam Telefónico",
+      "medio": "SMS",
+      "fecha": "2025-09-29"
+    },
+    {
+      "numero": "614-234-5678",
+      "categoria": "Fraude",
+      "medio": "Llamada",
+      "fecha": "2025-09-28"
+    },
+    {
+      "numero": "656-345-6789",
+      "categoria": "Acoso",
+      "medio": "WhatsApp",
+      "fecha": "2025-09-27"
+    },
+    {
+      "numero": "639-456-7890",
+      "categoria": "Extorsión",
+      "medio": "SMS",
+      "fecha": "2025-09-26"
+    },
+    {
+      "numero": "625-567-8901",
+      "categoria": "Venta Engañosa",
+      "medio": "Llamada",
+      "fecha": "2025-09-25"
+    },
+    {
+      "numero": "614-678-9012",
+      "categoria": "Cobranza Agresiva",
+      "medio": "Llamada",
+      "fecha": "2025-09-24"
+    },
+    {
+      "numero": "656-789-0123",
+      "categoria": "Fraude",
+      "medio": "Telegram",
+      "fecha": "2025-09-23"
+    },
+    {
+      "numero": "627-890-1234",
+      "categoria": "Extorsión",
+      "medio": "WhatsApp",
+      "fecha": "2025-09-22"
+    },
+    {
+      "numero": "648-901-2345",
+      "categoria": "Acoso",
+      "medio": "Llamada",
+      "fecha": "2025-09-21"
+    },
+    {
+      "numero": "614-112-2334",
+      "categoria": "Spam Telefónico",
+      "medio": "SMS",
+      "fecha": "2025-09-20"
+    },
+    {
+      "numero": "656-223-3445",
+      "categoria": "Fraude",
+      "medio": "Llamada",
+      "fecha": "2025-09-19"
+    },
+    {
+      "numero": "639-334-4556",
+      "categoria": "Extorsión",
+      "medio": "SMS",
+      "fecha": "2025-09-18"
+    },
+    {
+      "numero": "625-445-5667",
+      "categoria": "Venta Engañosa",
+      "medio": "WhatsApp",
+      "fecha": "2025-09-17"
+    },
+    {
+      "numero": "614-556-6778",
+      "categoria": "Acoso",
+      "medio": "Llamada",
+      "fecha": "2025-09-16"
+    },
+    {
+      "numero": "656-667-7889",
+      "categoria": "Cobranza Agresiva",
+      "medio": "Llamada",
+      "fecha": "2025-09-15"
+    },
+    {
+      "numero": "627-778-8990",
+      "categoria": "Fraude",
+      "medio": "SMS",
+      "fecha": "2025-09-14"
+    },
+    {
+      "numero": "648-889-9001",
+      "categoria": "Extorsión",
+      "medio": "Llamada",
+      "fecha": "2025-09-13"
+    },
+    {
+      "numero": "614-990-0112",
+      "categoria": "Spam Telefónico",
+      "medio": "Llamada",
+      "fecha": "2025-09-12"
+    },
+    {
+      "numero": "656-101-1223",
+      "categoria": "Acoso",
+      "medio": "WhatsApp",
+      "fecha": "2025-09-11"
+    },
+    {
+      "numero": "639-212-2334",
+      "categoria": "Fraude",
+      "medio": "Telegram",
+      "fecha": "2025-09-10"
+    },
+    {
+      "numero": "625-323-3445",
+      "categoria": "Venta Engañosa",
+      "medio": "SMS",
+      "fecha": "2025-09-09"
+    },
+    {
+      "numero": "614-434-4556",
+      "categoria": "Extorsión",
+      "medio": "Llamada",
+      "fecha": "2025-09-08"
+    },
+    {
+      "numero": "656-545-5667",
+      "categoria": "Cobranza Agresiva",
+      "medio": "Llamada",
+      "fecha": "2025-09-07"
+    },
+    {
+      "numero": "627-656-6778",
+      "categoria": "Fraude",
+      "medio": "WhatsApp",
+      "fecha": "2025-09-06"
+    },
+    {
+      "numero": "648-767-7889",
+      "categoria": "Acoso",
+      "medio": "Llamada",
+      "fecha": "2025-09-05"
+    }
+  ]
+}

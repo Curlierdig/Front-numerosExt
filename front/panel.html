@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel de Administración | SSPE</title>
+    <link href="../css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+
+    <link rel="stylesheet" href="../css/dataTables.bootstrap5.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.0.2/css/buttons.bootstrap5.css" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
+    <link href="../css/admin.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="wrapper">
+      <!-- Sidebar -->
+      <nav class="sidebar flex-shrink-0 p-3 text-white">
+        <ul class="nav nav-pills flex-column mt-3">
+          <li class="nav-item">
+            <a href="#" class="nav-link active d-flex align-items-center"> <i class="bi bi-speedometer2 me-2"></i> Dashboard </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link text-white d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#adminReporteModal"> <i class="bi bi-plus-circle me-2"></i> Nuevo Reporte </a>
+          </li>
+          <li class="nav-item super-admin-only">
+            <a href="/front/registroAdmin.html" class="nav-link text-white d-flex align-items-center"> <i class="bi bi-person-plus me-2"></i> Registrar Admin </a>
+          </li>
+          <li class="nav-item mt-auto pt-3 border-top border-secondary">
+            <a href="#" class="nav-link text-white d-flex align-items-center"> <i class="bi bi-box-arrow-left me-2"></i> Cerrar Sesión </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="main-content">
+        <nav class="navbar navbar-expand-lg top-navbar px-4">
+          <button class="btn btn-outline-secondary d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMobile" aria-controls="sidebarMobile">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <div class="collapse navbar-collapse">
+            <h4 class="navbar-nav me-auto mb-2 mb-lg-0 fw-bold pt-2" style="color: var(--chihuahua-blue-dark)">Dashboard de Reportes</h4>
+            <div class="d-flex align-items-center">
+              <img src="../images/insignia.jpg"Avatar" class="rounded-circle me-2" width="40" height="40" />
+              <span class="fw-semibold" style="color: var(--chihuahua-blue-dark)">Angel Elias </span>
+            </div>
+          </div>
+        </nav>
+
+        <!-- Contenido Principal -->
+        <main class="flex-grow-1 p-4">
+          <div class="card shadow-sm border-0">
+            <div class="card-header bg-white pb-0 border-0">
+              <h5 class="card-title fw-bold" style="color: var(--chihuahua-blue-dark)">Reportes Recibidos</h5>
+              <a href="http://192.168.0.194:8000/superadmin/cookies"> <i class="bi bi-plus-circle me-2"></i> Nuevo Reporte </a>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table id="tablaReportes" class="table table-striped table-hover" style="width: 100%">
+                  <thead class="">
+                    <tr>
+                      <th>ID</th>
+                      <th>Nombre</th>
+                      <th>Número Reportado</th>
+                      <th>Categoría</th>
+                      <th>Fecha</th>
+                      <th>Estatus</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Offcanvas para que sea responsive (como si fuera de telefono) -->
+    <div class="offcanvas offcanvas-start text-white" tabindex="-1" id="sidebarMobile" aria-labelledby="sidebarMobileLabel" style="background-color: var(--chihuahua-blue-dark)">
+      <div class="offcanvas-header border-bottom border-secondary">
+        <h5 class="offcanvas-title" id="sidebarMobileLabel">Panel SSPE</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <ul class="nav nav-pills flex-column mt-3">
+          <li class="nav-item">
+            <a href="#" class="nav-link active d-flex align-items-center"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link text-white d-flex align-items-center" id="btn-crear-reporte"> <i class="bi bi-plus-circle me-2"></i> Nuevo Reporte </a>
+          </li>
+          <li class="nav-item super-admin-only">
+            <a href="../front/registroAdmin.html" class="nav-link text-white d-flex align-items-center"><i class="bi bi-person-plus me-2"></i> Registrar Admin</a>
+          </li>
+          <li class="nav-item mt-auto pt-3 border-top border-secondary">
+            <a href="#" class="nav-link text-white d-flex align-items-center"><i class="bi bi-box-arrow-left me-2"></i> Cerrar Sesión</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Modal de los reportes -->
+    <div class="modal fade" id="adminReporteModal" tabindex="-1" aria-labelledby="adminModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="adminModalLabel">Detalles del Reporte<span id="folio-display" class="fw-bold"></span></h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+
+          <form id="editReportForm">
+            <input type="hidden" id="reporteId" value="" />
+            <div class="modal-body">
+              <!-- Información del Reportante (SOLO LECTURA) -->
+              <div id="editStep1" class="report-step">
+                <h5 class="step-title border-bottom pb-2 mb-3"><i class="bi bi-person-lines-fill me-2"></i>Información del Reportante</h5>
+                <div class="row">
+                  <div class="col-md-12 mb-3">
+                    <span for="folio-display" class="form-label">Folio del Reporte </span>
+                  </div>
+                  <div class="col-md-8 mb-3">
+                    <label for="editNombreUsuario" class="form-label">Nombre del Usuario</label>
+                    <input type="text" class="form-control" id="editNombreUsuario" readonly required />
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label for="editVecesReportado" class="form-label">Veces que ha reportado</label>
+                    <input type="number" class="form-control" id="editVecesReportado" readonly />
+                  </div>
+                </div>
+                <!-- CAMBIO: Añadido readonly a todos los campos de este paso -->
+                <div class="row">
+                  <div class="col-md-3 mb-3">
+                    <label for="editEdad" class="form-label">Edad</label>
+                    <input type="number" class="form-control" id="editEdad" readonly required />
+                  </div>
+                  <div class="col-md-3 mb-3">
+                    <label for="editSexo" class="form-label">Sexo</label>
+                    <select class="form-select" id="editSexo" aria-label="Seleccionar sexo" disabled required>
+                      <option selected>Seleccionar...</option>
+                      <option value="Hombre">Hombre</option>
+                      <option value="Mujer">Mujer</option>
+                      <option value="Otro">Otro</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="editNumeroUsuario" class="form-label">Número de Contacto</label>
+                    <input type="number" class="form-control" id="editNumeroUsuario" readonly required />
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="editCorreo" class="form-label">Correo</label>
+                    <input type="email" class="form-control" id="editCorreo" readonly required />
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="editMunicipio" class="form-label">Municipio</label>
+                    <select class="form-select" id="editMunicipio" aria-label="Seleccionar municipio" disabled required>
+                      <option selected>Seleccionar...</option>
+                      <option value="Ahumada">Ahumada</option>
+                      <option value="Aldama">Aldama</option>
+                      <option value="Allende">Allende</option>
+                      <option value="Aquiles Serdán">Aquiles Serdán</option>
+                      <option value="Ascensión">Ascensión</option>
+                      <option value="Bachíniva">Bachíniva</option>
+                      <option value="Balleza">Balleza</option>
+                      <option value="Batopilas de Manuel Gómez Morín">Batopilas de Manuel Gómez Morín</option>
+                      <option value="Bocoyna">Bocoyna</option>
+                      <option value="Buenaventura">Buenaventura</option>
+                      <option value="Camargo">Camargo</option>
+                      <option value="Carichí">Carichí</option>
+                      <option value="Casas Grandes">Casas Grandes</option>
+                      <option value="Chihuahua">Chihuahua</option>
+                      <option value="Chínipas">Chínipas</option>
+                      <option value="Coronado">Coronado</option>
+                      <option value="Coyame del Sotol">Coyame del Sotol</option>
+                      <option value="Cuauhtémoc">Cuauhtémoc</option>
+                      <option value="Cusihuiriachi">Cusihuiriachi</option>
+                      <option value="Delicias">Delicias</option>
+                      <option value="Dr. Belisario Domínguez">Dr. Belisario Domínguez</option>
+                      <option value="El Tule">El Tule</option>
+                      <option value="Galeana">Galeana</option>
+                      <option value="Gómez Farías">Gómez Farías</option>
+                      <option value="Gran Morelos">Gran Morelos</option>
+                      <option value="Guachochi">Guachochi</option>
+                      <option value="Guadalupe">Guadalupe</option>
+                      <option value="Guadalupe y Calvo">Guadalupe y Calvo</option>
+                      <option value="Guazapares">Guazapares</option>
+                      <option value="Guerrero">Guerrero</option>
+                      <option value="Hidalgo del Parral">Hidalgo del Parral</option>
+                      <option value="Huejotitán">Huejotitán</option>
+                      <option value="Ignacio Zaragoza">Ignacio Zaragoza</option>
+                      <option value="Janos">Janos</option>
+                      <option value="Jiménez">Jiménez</option>
+                      <option value="Juárez">Juárez</option>
+                      <option value="Julimes">Julimes</option>
+                      <option value="La Cruz">La Cruz</option>
+                      <option value="López">López</option>
+                      <option value="Madera">Madera</option>
+                      <option value="Maguarichi">Maguarichi</option>
+                      <option value="Manuel Benavides">Manuel Benavides</option>
+                      <option value="Matachí">Matachí</option>
+                      <option value="Matamoros">Matamoros</option>
+                      <option value="Meoqui">Meoqui</option>
+                      <option value="Morelos">Morelos</option>
+                      <option value="Moris">Moris</option>
+                      <option value="Namiquipa">Namiquipa</option>
+                      <option value="Nonoava">Nonoava</option>
+                      <option value="Nuevo Casas Grandes">Nuevo Casas Grandes</option>
+                      <option value="Ocampo">Ocampo</option>
+                      <option value="Ojinaga">Ojinaga</option>
+                      <option value="Praxedis G. Guerrero">Praxedis G. Guerrero</option>
+                      <option value="Riva Palacio">Riva Palacio</option>
+                      <option value="Rosales">Rosales</option>
+                      <option value="Rosario">Rosario</option>
+                      <option value="San Francisco de Borja">San Francisco de Borja</option>
+                      <option value="San Francisco de Conchos">San Francisco de Conchos</option>
+                      <option value="San Francisco del Oro">San Francisco del Oro</option>
+                      <option value="Santa Bárbara">Santa Bárbara</option>
+                      <option value="Santa Isabel">Santa Isabel</option>
+                      <option value="Satevó">Satevó</option>
+                      <option value="Saucillo">Saucillo</option>
+                      <option value="Temósachic">Temósachic</option>
+                      <option value="Urique">Urique</option>
+                      <option value="Uruachi">Uruachi</option>
+                      <option value="Valle de Zaragoza">Valle de Zaragoza</option>
+                      <option value="otro">Otro</option>
+                    </select>
+                  </div>
+                  <div class="col-md-12 mb-3">
+                    <label for="Via" class="form-label"
+                      ><h5><i class="bi bi-person-rolodex"></i> Via del reporte</h5></label
+                    >
+                    <input type="text" class="form-control" id="Via" readonly />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Detalles del Reporte (EDITABLE) -->
+              <div id="editStep2" class="report-step" style="display: none">
+                <h5 class="step-title border-bottom pb-2 mb-3"><i class="bi bi-file-earmark-text-fill me-2"></i>Detalles del Reporte</h5>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="editNumeroReportado" class="form-label">Número Reportado</label>
+                    <input type="tel" class="form-control" id="editNumeroReportado" readonly />
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="editFechaReporte" class="form-label">Fecha del Reporte</label>
+                    <input type="date" class="form-control" id="editFechaReporte" required />
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="editCategoria" class="form-label">Categoría</label>
+                    <select class="form-select" id="editCategoria" required>
+                      <option>Extorsión</option>
+                      <option>Fraude</option>
+                      <option>Acoso</option>
+                      <option>Venta Engañosa</option>
+                      <option>Cobranza Agresiva</option>
+                      <option>Spam Telefónico</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="editMedioContacto" class="form-label">Medio de Contacto</label>
+                    <input type="text" class="form-control" id="editMedioContacto" required />
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="editDescripcion" class="form-label">Descripción</label>
+                  <textarea class="form-control" id="editDescripcion" rows="3"></textarea>
+                </div>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="editSupuestoNombre" class="form-label">Supuesto Nombre (Opcional)</label>
+                    <input type="text" class="form-control" id="editSupuestoNombre" />
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="editSupuestoGenero" class="form-label">Supuesto Género</label>
+                    <select class="form-select" id="editSupuestoGenero">
+                      <option value="" selected>No especificado</option>
+                      <option>Hombre</option>
+                      <option>Mujer</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="editSupuestoTrabajo" class="form-label">Supuesto Trabajo (Opcional)</label>
+                    <input type="text" class="form-control" id="editSupuestoTrabajo" />
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="editEstatus" class="form-label">Estatus del Reporte</label>
+                    <select class="form-select" id="editEstatus" required>
+                      <option>Pendiente</option>
+                      <option>En Proceso</option>
+                      <option>Resuelto</option>
+                      <option>Descartado</option>
+                    </select>
+                  </div>
+                </div>
+                <fieldset class="border p-3 rounded-3">
+                  <legend class="float-none w-auto px-2 h6">Información de Destino (Fraudes)</legend>
+                  <div class="row">
+                    <div class="col-md-12 mb-3">
+                      <label for="editTipoDestino" class="form-label">Tipo de Destino</label>
+                      <select class="form-select" id="editTipoDestino">
+                        <option value="" selected>Ninguno</option>
+                        <option>Tarjeta</option>
+                        <option>Ubicación</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div id="tarjetaContainer" style="display: none">
+                    <hr />
+                    <div class="mb-3">
+                      <label for="editNumeroTarjeta" class="form-label">Número de Tarjeta (16 dígitos)</label>
+                      <input type="text" class="form-control" id="editNumeroTarjeta" inputmode="numeric" pattern="[0-9]{16}" maxlength="16" placeholder="Solo números" />
+                    </div>
+                  </div>
+
+                  <div id="ubicacionContainer" style="display: none">
+                    <hr />
+                    <div class="mb-3">
+                      <label for="editDireccion" class="form-label">Dirección o Ubicación</label>
+                      <textarea class="form-control" id="editDireccion" rows="2" placeholder="Ubicación"></textarea>
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" id="deleteBtn" class="btn btn-danger me-auto">Eliminar Reporte</button>
+              <button type="button" id="prevBtn" class="btn btn-secondary" style="display: none">Atrás</button>
+              <button type="button" id="nextBtn" class="btn btn-primary">Siguiente</button>
+              <button type="submit" id="saveBtn" class="btn btn-success" style="display: none">Guardar Cambios</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true" style="z-index: 1060">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="confirmationModalLabel"><i class="bi bi-check-circle-fill me-2"></i>Confirmar Cambios</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">¿Estás seguro de que quieres guardar los cambios en este reporte? Esta acción no se puede deshacer.</div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-success" id="confirmSaveBtn">Sí, Guardar Cambios</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="confirmationModalDelete" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true" style="z-index: 1060">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="confirmationModalLabel"><i class="bi bi-check-circle-fill me-2"></i>Confirmar Cambios</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">¿Estás seguro de que quieres borrar este reporte? Esta acción no se puede deshacer.</div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-success" id="confirmSaveBtn">Sí</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Librerías JS -->
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/2.0.5/js/dataTables.js"></script>
+    <script src="https://cdn.datatables.net/2.0.5/js/dataTables.bootstrap5.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.0.2/js/dataTables.buttons.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.bootstrap5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.print.min.js"></script>
+    <script src="../js/logica_modal.js"></script>
+  </body>
+</html>

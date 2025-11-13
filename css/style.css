@@ -1,0 +1,177 @@
+/* Estilos para el contenedor principal del carrusel */
+.carousel-custom {
+  background-color: #0d6efd; /* Fondo azul de Bootstrap */
+  color: white; /* Color de texto blanco para contraste */
+  border-radius: 15px; /* Esquinas redondeadas */
+  overflow: hidden; /* Asegura que el contenido interno respete los bordes redondeados */
+  padding-bottom: 30px; /* Espacio extra en la parte inferior para los indicadores */
+}
+
+/* Estilos para los indicadores (los botones de abajo) */
+.carousel-custom .carousel-indicators button {
+  width: 12px; /* Ancho del círculo */
+  height: 12px; /* Alto del círculo */
+  border-radius: 100%; /* Esto los hace perfectamente circulares */
+  background-color: #ffffff; /* Color de los indicadores inactivos */
+  border: none; /* Quita el borde por defecto */
+  margin: 0 5px; /* Espacio entre los indicadores */
+}
+
+/* Estilo para el indicador del slide activo */
+.carousel-custom .carousel-indicators .active {
+  background-color: #f8f9fa; /* Un color ligeramente diferente para el activo si se desea */
+}
+
+/* Login y registro */
+
+.form-container {
+  background-color: #ffffff;
+  border-radius: 1rem; /* Bordes redondeados como en tu diseño */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 450px;
+  width: 100%;
+}
+.btn-primary {
+  /* Aseguramos que el botón tenga el color azul de tus imágenes */
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  padding: 0.75rem;
+  font-weight: 500;
+}
+
+.login-card {
+  background-color: #003676;
+  border-radius: 30px;
+  color: white;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.login-card .form-label {
+  color: #cdd3da;
+  font-weight: 500;
+}
+
+.login-card .form-control {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+}
+
+.login-card .form-control::placeholder {
+  color: #aab2bd;
+}
+
+.login-card .form-control:focus {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+}
+
+.login-card .btn-login {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 0.8rem;
+  font-weight: bold;
+  font-size: 1.1rem;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.login-card .btn-login:hover {
+  background-color: #0056b3;
+}
+
+/* MODAL */
+
+/* Contenedor principal del modal (el marco) */
+.modal-content {
+  background-color: #0d2a4f; /* Azul oscuro */
+  color: white; /* Texto blanco para la cabecera/pie */
+  border-radius: 15px;
+  border: none;
+}
+
+/* Área del formulario (cuerpo del modal) */
+.modal-body {
+  background-color: #eaf2f8; /* Azul claro */
+  color: #212529; /* Texto oscuro para los labels */
+}
+
+/* Campos del formulario (inputs, selects, textareas) */
+.form-control,
+.form-select {
+  background-color: #ffffff; /* Fondo siempre blanco para máximo contraste */
+  border: 1px solid #ced4da;
+}
+
+/* Cabecera y Pie del Modal */
+.modal-header,
+.modal-footer {
+  border: none; /* Quitamos las líneas divisorias */
+}
+
+/* Cambiamos el color del botón principal para que contraste con el fondo oscuro */
+.modal-footer .btn-light {
+  font-weight: bold;
+}
+
+/* Estilos específicos para el panel de admin */
+@media (min-width: 768px) {
+  .sidebar-fixed {
+    height: 100vh;
+  }
+}
+
+/* Estilos para la tabla de incidencias */
+.section-header {
+  background-color: #003e7e; /* azul institucional oscuro */
+  color: white;
+  padding: 1rem;
+  text-align: center;
+  border-radius: 0.25rem 0.25rem 0 0;
+}
+
+.reportes-card {
+  border: 1px solid #dcdcdc;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  background: white;
+}
+
+.reportes-card .table thead th {
+  background-color: #005bbb; /* un tono azul más claro */
+  color: white;
+  border: none;
+}
+
+.reportes-card .table tbody tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.reportes-card .table tbody td,
+.reportes-card .table tbody th {
+  border: none;
+}
+
+.reportes-card .table td,
+.reportes-card .table th {
+  vertical-align: middle;
+}
+
+.reportes-card .card-footer {
+  background-color: #f0f0f0;
+  padding: 0.75rem 1rem;
+  text-align: right;
+  font-size: 0.9rem;
+  color: #666;
+}

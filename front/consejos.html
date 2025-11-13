@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Consejos de Seguridad | Plataforma de Denuncia SSPE</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
+
+    <style>
+      :root {
+        --chihuahua-blue-dark: #0b3c5d;
+        --chihuahua-blue-light: #328cc1;
+        --chihuahua-gray: #f0f2f5;
+      }
+
+      body {
+        font-family: "Montserrat", sans-serif;
+        background-color: #fff;
+      }
+
+      /* --- Header y Nav --- */
+      .header-main {
+        background-color: var(--chihuahua-blue-dark);
+      }
+
+      .navbar-brand img {
+        max-height: 45px;
+      }
+
+      .logo-container {
+        background-color: white;
+        padding: 0.5rem;
+        border-radius: 8px;
+      }
+
+      .logo-container img {
+        max-height: 35px;
+      }
+
+      /* --- Contenido --- */
+      .page-header {
+        background-color: var(--chihuahua-gray);
+        padding: 3rem 0;
+        border-bottom: 1px solid #ddd;
+      }
+
+      .card {
+        border: none;
+        border-radius: 15px;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      }
+
+      .card-icon {
+        font-size: 3rem;
+        color: var(--chihuahua-blue-light);
+      }
+
+      /* Acordeón */
+      .accordion-button:not(.collapsed) {
+        color: #fff;
+        background-color: var(--chihuahua-blue-dark);
+      }
+      .accordion-button:focus {
+        box-shadow: 0 0 0 0.25rem rgba(49, 138, 192, 0.5);
+      }
+
+      /* Sección de denuncia */
+      .section-denuncia {
+        background-color: var(--chihuahua-gray);
+      }
+      .denuncia-card {
+        background-color: var(--chihuahua-blue-dark);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+      }
+      .denuncia-card h1 {
+        font-size: 4rem;
+        font-weight: 700;
+      }
+
+      /* --- Footer --- */
+      .footer-dark {
+        background-color: #343a40;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header-main text-white py-2">
+      <div class="container d-flex justify-content-between align-items-center">
+        <a class="navbar-brand" href="../index.html">
+          <div class="logo-container d-flex align-items-center">
+            <img src="../images/logo-chihuahua.png" alt="Logo Gobierno del Estado de Chihuahua" class="me-3" />
+            <img src="../images/sspe logo.png" alt="Logo SSPE" />
+          </div>
+        </a>
+        <div class="text-end d-none d-lg-block">
+          <span class="fw-bold">PLATAFORMA ESTATAL</span><br />
+          <span>Secretaría de Seguridad Pública del Estado</span>
+        </div>
+      </div>
+    </header>
+
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--chihuahua-blue-light)">
+      <div class="container">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item"><a class="nav-link" href="../index.html">Inicio</a></li>
+            <li class="nav-item"><a class="nav-link" href="../index.html#denuncia">Denuncia Aquí</a></li>
+            <li class="nav-item"><a class="nav-link" href="../incidencias.html">Lista de Números</a></li>
+            <li class="nav-item"><a class="nav-link active" href="../consejos.html">Consejos de Seguridad</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <section class="page-header text-center">
+        <div class="container">
+          <h1 class="display-5 fw-bold">Protégete de Estafas Telefónicas</h1>
+          <p class="lead text-muted">La información y la prevención son tus mejores defensas.</p>
+        </div>
+      </section>
+
+      <section class="container my-5">
+        <div class="alert alert-warning d-flex align-items-center" role="alert">
+          <i class="bi bi-exclamation-triangle-fill me-3 fs-4"></i>
+          <div><strong>¡Tu seguridad es la prioridad!</strong> No sigas instrucciones de desconocidos ni te expongas al peligro. Tu primer paso siempre es proteger tu integridad.</div>
+        </div>
+
+        <h2 class="mt-5 mb-4 text-center fw-bold" style="color: var(--chihuahua-blue-dark)">Protocolo de Actuación: ¿Qué hacer?</h2>
+        <div class="row g-4">
+          <div class="col-lg-4 col-md-6">
+            <div class="card h-100 shadow-sm text-center p-3">
+              <div class="card-body">
+                <i class="bi bi-shield-check card-icon mb-3"></i>
+                <h5 class="card-title fw-bold">1. Mantén la Calma</h5>
+                <p class="card-text">Los delincuentes usan el pánico a su favor. Respira y no tomes decisiones apresuradas.</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-6">
+            <div class="card h-100 shadow-sm text-center p-3">
+              <div class="card-body">
+                <i class="bi bi-telephone-x card-icon mb-3"></i>
+                <h5 class="card-title fw-bold">2. Cuelga Inmediatamente</h5>
+                <p class="card-text">No necesitas dar explicaciones. Si la llamada es sospechosa, termina la comunicación.</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-6">
+            <div class="card h-100 shadow-sm text-center p-3">
+              <div class="card-body">
+                <i class="bi bi-person-slash card-icon mb-3"></i>
+                <h5 class="card-title fw-bold">3. No Des Información</h5>
+                <p class="card-text">Nunca compartas datos personales, familiares o bancarios. Es la información que buscan.</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-6">
+            <div class="card h-100 shadow-sm text-center p-3">
+              <div class="card-body">
+                <i class="bi bi-person-check card-icon mb-3"></i>
+                <h5 class="card-title fw-bold">4. Verifica la Situación</h5>
+                <p class="card-text">Si mencionan a un familiar, cuelga y contáctalo directamente a su número de siempre.</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-6">
+            <div class="card h-100 shadow-sm text-center p-3">
+              <div class="card-body">
+                <i class="bi bi-slash-circle card-icon mb-3"></i>
+                <h5 class="card-title fw-bold">5. Bloquea el Número</h5>
+                <p class="card-text">Utiliza las funciones de tu teléfono para bloquear el número y evitar futuro contacto.</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-6">
+            <div class="card h-100 shadow-sm text-center p-3">
+              <div class="card-body">
+                <i class="bi bi-people card-icon mb-3"></i>
+                <h5 class="card-title fw-bold">6. Habla con tu Familia</h5>
+                <p class="card-text">Comenta lo sucedido. Establezcan claves y compartan estas recomendaciones.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="py-5" style="background-color: var(--chihuahua-gray)">
+        <div class="container">
+          <h2 class="text-center fw-bold mb-4" style="color: var(--chihuahua-blue-dark)">Identifica los Engaños Más Comunes</h2>
+          <div class="accordion" id="accordionFraudes">
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"><strong>Premio Falso o Sorteo</strong></button>
+              </h2>
+              <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionFraudes">
+                <div class="accordion-body">
+                  Te informan que ganaste un premio (auto, viaje, dinero) y te piden depositar dinero para "impuestos" o "gastos de envío". <strong>Nunca deposites para reclamar un premio.</strong>
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo"><strong>Familiar Detenido o Secuestrado</strong></button>
+              </h2>
+              <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionFraudes">
+                <div class="accordion-body">
+                  Un supuesto familiar (generalmente un sobrino o primo lejano) te llama angustiado diciendo que está detenido en la frontera o secuestrado, pidiendo dinero urgente.
+                  <strong>Siempre verifica contactando a tus familiares.</strong>
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree"><strong>Amenaza de un Grupo Delictivo</strong></button>
+              </h2>
+              <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionFraudes">
+                <div class="accordion-body">
+                  Te llaman diciendo que pertenecen a un cartel, que te vigilan y exigen un "pago por protección" para no hacerte daño a ti o a tu familia.
+                  <strong>Es una táctica de intimidación; cuelga y reporta.</strong>
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour"><strong>Patrón o Jefe en Problemas</strong></button>
+              </h2>
+              <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#accordionFraudes">
+                <div class="accordion-body">
+                  Se hacen pasar por tu jefe o el dueño de la empresa, diciendo que tienen una emergencia y necesitan que deposites dinero de la compañía urgentemente.
+                  <strong>Verifica directamente con tu superior antes de hacer cualquier movimiento.</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="py-5">
+        <div class="container text-center">
+          <h2 class="fw-bold" style="color: var(--chihuahua-blue-dark)">Tu Reporte es Fundamental</h2>
+          <p class="lead mb-4">Usa los números oficiales. Tu denuncia ayuda a las autoridades a investigar.</p>
+          <div class="row g-4 justify-content-center">
+            <div class="col-md-5">
+              <div class="denuncia-card text-center">
+                <i class="bi bi-telephone-outbound-fill" style="font-size: 3rem"></i>
+                <h3 class="mt-2">Emergencia Inmediata</h3>
+                <h1 class="display-3">911</h1>
+                <p class="mb-0">Si te sientes en peligro o la amenaza es directa.</p>
+              </div>
+            </div>
+            <div class="col-md-5">
+              <div class="denuncia-card text-center" style="background-color: #c82333">
+                <i class="bi bi-shield-lock-fill" style="font-size: 3rem"></i>
+                <h3 class="mt-2">Denuncia Anónima</h3>
+                <h1 class="display-3">089</h1>
+                <p class="mb-0">Para reportar el número de forma segura y confidencial.</p>
+              </div>
+            </div>
+          </div>
+          <p class="mt-4 text-muted">La **Policía Cibernética** de la SSPE es la unidad especializada en atender este tipo de incidentes.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer-dark pt-5 pb-4 mt-auto">
+      <div class="container text-center text-md-start">
+        <div class="row">
+          <div class="col-md-6 col-lg-4 mx-auto mb-4">
+            <h6 class="text-uppercase fw-bold">Gobierno del Estado de Chihuahua</h6>
+            <hr class="mb-4 mt-0 d-inline-block mx-auto" style="width: 60px; background-color: var(--chihuahua-blue-light); height: 2px" />
+            <p>Trabajando juntos por un estado más seguro y justo para todos.</p>
+          </div>
+          <div class="col-md-6 col-lg-4 mx-auto mb-4">
+            <h6 class="text-uppercase fw-bold">Contacto de Emergencia y Denuncia</h6>
+            <hr class="mb-4 mt-0 d-inline-block mx-auto" style="width: 60px; background-color: var(--chihuahua-blue-light); height: 2px" />
+            <p><i class="bi bi-telephone-fill me-3"></i> Emergencias: 911</p>
+            <p><i class="bi bi-shield-lock-fill me-3"></i> Denuncia Anónima: 089</p>
+          </div>
+        </div>
+      </div>
+      <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2)">© 2025 Secretaría de Seguridad Pública del Estado de Chihuahua.</div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
