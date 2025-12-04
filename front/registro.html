@@ -56,7 +56,7 @@
 
           <div class="mb-3">
             <label for="phone" class="form-label">Teléfono</label>
-            <input type="tel" class="form-control" id="phone" placeholder="614 554 2343" />
+            <input type="tel" class="form-control" id="phone" required maxlength="10" placeholder="10 dígitos" />
           </div>
 
           <div class="mb-3">
@@ -73,8 +73,9 @@
             <label for="gender" class="form-label">Sexo</label>
             <select class="form-select" id="gender" aria-label="Seleccionar sexo">
               <option selected disabled>Seleccionar...</option>
-              <option value="masculino">Masculino</option>
-              <option value="femenino">Femenino</option>
+              <option value="Masculino">Masculino</option>
+              <option value="Femenino">Femenino</option>
+              <option value="Otro">Otro</option>
             </select>
           </div>
 
@@ -168,71 +169,12 @@
       </div>
     </div>
 
+    <script src="../js/config.js"></script>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
-    <script src="..js/registro.js"></script>
-    <script>
-      const form = document.querySelector(".login-card form");
-
-      // Mostrar/ocultar campo "otro municipio" si usas esa lógica
-      const municipality = document.getElementById("municipality");
-      const otroContainer = document.getElementById("otroMunicipioContainer");
-      municipality?.addEventListener("change", () => {
-        otroContainer.classList.toggle("d-none", municipality.value !== "otro");
-      });
-
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        // Leer valores del formulario
-        const payload = {
-          correo: document.getElementById("email").value.trim(),
-          numeroTelefono: document.getElementById("phone").value.trim(),
-          nombre: document.getElementById("fullName").value.trim(),
-          edad: Number(document.getElementById("age").value || 0),
-          sexo: document.getElementById("gender").value,
-          municipio: document.getElementById("municipality").value === "otro" ? document.getElementById("otroMunicipioInput").value.trim() : document.getElementById("municipality").value,
-          entidadForanea: document.getElementById("state").value.trim(),
-        };
-
-        // Validaciones simples (puedes ampliarlas)
-        if (!payload.correo || !payload.nombre) {
-          alert("Por favor llena al menos correo y nombre completo.");
-          return;
-        }
-
-        try {
-          const res = await fetch("http://192.168.0.194:8000/auth/registrar", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json", // importante para enviar JSON
-            },
-            // credentials: "include", // descomenta si tu backend devuelve cookies y quieres que el navegador las guarde
-            body: JSON.stringify(payload),
-          });
-
-          // Mostrar estado para depuración
-          console.log("status:", res.status);
-
-          if (res.ok) {
-            const data = await res.json().catch(() => null);
-            // éxito: redirigir o mostrar mensaje
-            alert(data?.message || "Registro exitoso");
-            // window.location.href = "/front/panel.html"; // descomenta si quieres redirigir
-          } else {
-            // intentar leer respuesta con error
-            const err = await res.json().catch(() => ({ detail: "Error" }));
-            console.error("Error response:", err);
-            alert(err.detail || "Error en el registro");
-          }
-        } catch (error) {
-          console.error("Fetch error:", error);
-          alert("No fue posible conectar con el servidor. Revisa CORS / la IP / el servidor.");
-        }
-      });
-    </script>
+    <script src="../js/registro.js"></script>
   </body>
 </html>

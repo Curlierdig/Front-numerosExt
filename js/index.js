@@ -101,61 +101,139 @@ document.addEventListener("DOMContentLoaded", function () {
         saveBtn.textContent = "Enviando...";
       }
 
-      // Obtenemos el Token de sesión
+      // Obtenemos el Token de sesión y el ID del usuario
       const token = sessionStorage.getItem("id");
+      const userId = sessionStorage.getItem("id"); // Esto parece ser lo mismo que token
 
-      // Verificamos que el token exista
-      if (!token) {
+      // Verificamos que el ID exista
+      if (!userId) {
         alert("Tu sesión ha expirado. Por favor, inicia sesión de nuevo.");
-        window.location.href = "../front/login.html"; // Lo manda al login
+        window.location.href = "../front/login.html";
         return;
       }
-      // Recolectamos los datos (del step 2)
 
+      // Recolectamos los datos (del step 2)
       const medioContacto = medioContactoSelect.value;
       const medioContactoFinal = medioContacto === "otro" ? document.getElementById("otroMedio").value : medioContacto;
 
+      // ⭐⭐ IMPORTANTE: Construir el objeto EXACTAMENTE como lo espera el backend
+      // Basado en lo que funciona en adminReportes.js
       const requestBody = {
-        idUsuario: sessionStorage.id,
-        numeroReportado: document.getElementById("adminNumero").value,
+        // ⭐ Probamos diferentes formatos de idUsuario
+        idUsuario: userId, // Con 'U' mayúscula
+        idusuario: userId, // Todo minúscula (por si acaso)
+
+        // Campos del reporte (ajusta según lo que espera el backend)
+        numeroReportado: document.getElementById("adminNumero").value.trim(),
         categoriaReporte: document.getElementById("adminCategoria").value,
         medioContacto: medioContactoFinal,
-        descripcion: document.getElementById("adminDescripcion").value,
-        genero: document.getElementById("adminSupuestoGenero").value || null,
-        supuestoNombre: document.getElementById("adminSupuestoNombre").value || null,
-        supuestoTrabajo: document.getElementById("adminSupuestoTrabajo").value || null,
-        tipoDestino: tipoDestinoSelect.value,
-        numeroTarjeta: document.getElementById("adminNumeroTarjeta").value || null,
-        direccion: document.getElementById("adminDireccion").value || null,
+        fechareporte: new Date().toISOString().split("T")[0], // Fecha actual
+
+        // Campos opcionales
+        descripcion: document.getElementById("adminDescripcion").value.trim() || null,
+        genero: document.getElementById("adminSupuestoGenero").value || "No especificado",
+        supuestoNombre: document.getElementById("adminSupuestoNombre").value.trim() || null,
+        supuestoTrabajo: document.getElementById("adminSupuestoTrabajo").value.trim() || null,
+        estatus: "Pendiente", // Valor por defecto
+
+        // Campos de destino
+        tipoDestino: tipoDestinoSelect.value === "Ninguno" ? null : tipoDestinoSelect.value,
+        numeroTarjeta: document.getElementById("adminNumeroTarjeta").value.trim() || null,
+        direccion: document.getElementById("adminDireccion").value.trim() || null,
       };
 
-      console.log("Datos a enviar:", requestBody);
-      console.log(sessionStorage.id);
-      console.log(token);
+      // Validaciones básicas
+      if (!requestBody.numeroReportado || requestBody.numeroReportado.length !== 10) {
+        alert("Por favor ingresa un número de teléfono válido (10 dígitos).");
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.textContent = "Guardar Cambios";
+        }
+        return;
+      }
 
-      // FETCH POST
+      if (!requestBody.categoriaReporte) {
+        alert("Por favor selecciona una categoría.");
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.textContent = "Guardar Cambios";
+        }
+        return;
+      }
+
+      if (!requestBody.medioContacto) {
+        alert("Por favor selecciona un medio de contacto.");
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.textContent = "Guardar Cambios";
+        }
+        return;
+      }
+
+      // Validación específica para tarjeta
+      if (requestBody.tipoDestino === "Tarjeta") {
+        const numeroTarjeta = document.getElementById("adminNumeroTarjeta").value.trim();
+        if (!numeroTarjeta || numeroTarjeta.length !== 16) {
+          alert("El número de tarjeta debe tener 16 dígitos.");
+          if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.textContent = "Guardar Cambios";
+          }
+          return;
+        }
+      }
+
+      console.log("📤 Datos a enviar:", JSON.stringify(requestBody, null, 2));
+      console.log("🔑 User ID:", userId);
+      // FETCH POST con mejor manejo de errores
       try {
-        const response = await fetch("http://192.168.0.194:8000/incidencias/crear", {
+        const response = await fetch(`${API_URL}/incidencias/crear`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            // Si necesitas Authorization, descomenta la siguiente línea
+            // "Authorization": `Bearer ${token}`
           },
           body: JSON.stringify(requestBody),
         });
 
+        // Obtener la respuesta para debug
+        const responseText = await response.text();
+        console.log("📥 Respuesta del servidor:", responseText);
+
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.detail || "No se pudo enviar el reporte. Intenta de nuevo.");
+          // Intentar parsear como JSON para obtener detalles del error
+          let errorDetail = "Error desconocido";
+          try {
+            const errorData = JSON.parse(responseText);
+            if (errorData.detail) {
+              if (Array.isArray(errorData.detail)) {
+                errorDetail = errorData.detail.map((err) => `${err.loc?.[err.loc.length - 1] || "campo"}: ${err.msg}`).join("\n");
+              } else {
+                errorDetail = errorData.detail;
+              }
+            } else if (errorData.message) {
+              errorDetail = errorData.message;
+            }
+          } catch {
+            errorDetail = responseText || `Error ${response.status}`;
+          }
+
+          throw new Error(`No se pudo enviar el reporte:\n${errorDetail}`);
         }
 
-        const result = await response.json();
-        console.log("Reporte enviado con éxito:", result);
+        // Si la respuesta fue exitosa
+        console.log("✅ Reporte enviado con éxito");
 
         reporteModal.hide(); // Cierra el modal
+
+        // Mostrar mensaje de éxito
         alert("¡Reporte enviado con éxito! Gracias por tu colaboración.");
+
+        // Opcional: limpiar el formulario
+        wizardForm.reset();
       } catch (error) {
-        console.error("Error al enviar el reporte:", error);
+        console.error("❌ Error al enviar el reporte:", error);
         alert(error.message);
       } finally {
         // Reactivamos el botón
@@ -166,6 +244,8 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   }
+
+  
 
   // FUNCIÓN DE LIMPIEZA
   // Resetea el modal cuando se cierra

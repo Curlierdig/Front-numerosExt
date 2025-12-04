@@ -33,7 +33,7 @@
 
           <div class="mb-4">
             <label for="phoneLogin" class="form-label">Teléfono</label>
-            <input type="tel" class="form-control" id="phoneLogin" placeholder="614 554 2343" />
+            <input type="tel" class="form-control" id="phoneLogin" required maxlength="10" placeholder="10 dígitos" />
           </div>
 
           <div id="login-alert-container" class="mt-3"></div>
@@ -41,81 +41,18 @@
           <button type="submit" class="btn btn-login w-100" id="login-button">Iniciar sesión</button>
 
           <div class="text-center mt-3">
-            <p class="mb-0 text-light">¿No tienes cuenta? <a href="#" class="text-decoration-none text-info">Regístrate aquí.</a></p>
+            <p class="mb-0 text-light">¿No tienes cuenta? <a href="../front/registro.html" class="text-decoration-none text-info">Regístrate aquí.</a></p>
           </div>
         </form>
       </div>
     </div>
 
+    <script src="../js/config.js"></script>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
-    <script>
-      // 1. Esperamos a que todo el HTML esté cargado
-      document.addEventListener("DOMContentLoaded", function () {
-        // 2. Seleccionamos los elementos que vamos a usar
-        const loginForm = document.getElementById("login-form");
-        const loginButton = document.getElementById("login-button");
-        const alertContainer = document.getElementById("login-alert-container");
-
-        // 3. Añadimos el "listener" al formulario
-        loginForm.addEventListener("submit", async function (event) {
-          // 4. Prevenimos que la página se recargue
-          event.preventDefault();
-
-          const formData = new FormData();
-          formData.append("correo", document.getElementById("emailLogin").value);
-          formData.append("contrasena", document.getElementById("phoneLogin").value);
-
-          // 5. Limpiamos errores anteriores y desactivamos el botón
-          alertContainer.innerHTML = "";
-          loginButton.disabled = true;
-          loginButton.textContent = "Iniciando...";
-
-          try {
-            // 8. Hacemos el FETCH (¡La mera mata!)
-            // CAMBIA ESTA URL por la de tu API de login
-            const response = await fetch("http://192.168.0.194:8000/auth/login", {
-              method: "POST",
-              body: formData,
-              credentials: "include", // importante para enviar cookies
-            });
-
-            // 9. Manejamos la respuesta
-            if (!response.ok) {
-              // Si la API responde con 400, 401, 500, etc., entra aquí
-              const errorData = await response.json();
-              throw new Error(errorData.detail || "Correo o teléfono incorrectos. Intenta de nuevo.");
-            }
-
-            // 10. ¡ÉXITO! Si el login es correcto (status 200)
-            const data = await response.json();
-
-            // 11. Guardamos el Token (JWT) en el localStorage
-            // Asumo que tu API regresa un "access_token"
-            if (data) {
-              sessionStorage.setItem("id", data.id);
-              // (Opcional) Guarda el rol si tu API lo regresa
-              // localStorage.setItem("userRole", data.user.role);
-            }
-
-            // 12. Redirigimos al index.html
-            window.location.href = "/front/index.html";
-          } catch (error) {
-            // 13. Si algo falla (el fetch, o el error que lanzamos), lo mostramos
-            const alerta = `<div class="alert alert-danger" role="alert">
-                              ${error.message}
-                           </div>`;
-            alertContainer.innerHTML = alerta;
-          } finally {
-            // 14. Pase lo que pase, volvemos a activar el botón
-            loginButton.disabled = false;
-            loginButton.textContent = "Iniciar sesión";
-          }
-        });
-      });
-    </script>
+    <script src="../js/login.js"></script>
   </body>
 </html>
