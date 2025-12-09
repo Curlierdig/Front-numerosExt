@@ -7,7 +7,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   formData.append("contrasena", document.getElementById("passwordInput").value);
   formData.append("rol", "admin");
   try {
-    const res = await fetch(`${API_URL}/auth/login`, {
+    const res = await fetch(`/api/auth/login`, {
       method: "POST",
       body: formData,
       credentials: "include",

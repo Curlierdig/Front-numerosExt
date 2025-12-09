@@ -3,7 +3,7 @@ $(document).ready(function () {
   $("#tablaIncidencias").DataTable({
     // 2. Hacemos el "fetch" (DataTables lo llama 'ajax')
     ajax: {
-      url: `${API_URL}/incidencias/usuarios`,
+      url: `/api/incidencias/usuarios`,
       dataSrc: "data",
 
       error: function (xhr, error, thrown) {

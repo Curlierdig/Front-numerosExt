@@ -43,7 +43,7 @@ form.addEventListener("submit", async (e) => {
   }
 
   try {
-    const res = await fetch(`${API_URL}/auth/registrar`, {
+    const res = await fetch(`/api/auth/registrar`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

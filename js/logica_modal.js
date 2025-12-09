@@ -176,7 +176,7 @@ async function obtenerPerfilAdmin() {
   }
 
   try {
-    const response = await fetch(`${API_URL}/auth/profile`, {
+    const response = await fetch(`/api/auth/profile`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -724,7 +724,7 @@ async function validarUsuario(telefono, correo) {
     formData.append("contrasena", telefono); // Se usa el teléfono como contraseña
 
     // Hacer la petición al servidor
-    const response = await fetch(`${API_URL}/auth/login`, {
+    const response = await fetch(`/api/auth/login`, {
       method: "POST",
       body: formData,
       credentials: "include",
@@ -841,10 +841,10 @@ async function registrarUsuario() {
     };
 
     console.log("📤 Enviando datos de registro:", datosUsuario);
-    console.log("🌐 Endpoint:", `${API_URL}/auth/registrar`);
+    console.log("🌐 Endpoint:", `/api/auth/registrar`);
 
     // Hacer la petición de registro
-    const response = await fetch(`${API_URL}/auth/registrar`, {
+    const response = await fetch(`/api/auth/registrar`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1083,7 +1083,7 @@ async function cargarReporteCompleto(reporteId) {
 
   try {
     // Hacer la petición al servidor
-    const response = await fetch(`${API_URL}/incidencias/incidencia_completa/${reporteId}`);
+    const response = await fetch(`/api/incidencias/incidencia_completa/${reporteId}`);
 
     // Verificar si la respuesta es exitosa
     if (!response.ok) {

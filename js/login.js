@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", function () {
     try {
       // 8. Hacemos el FETCH (¡La mera mata!)
       // CAMBIA ESTA URL por la de tu API de login
-      const response = await fetch(`${API_URL}/auth/login`, {
+      const response = await fetch(`/api/auth/login`, {
         method: "POST",
         body: formData,
         credentials: "include", // importante para enviar cookies

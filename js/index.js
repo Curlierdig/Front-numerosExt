@@ -187,7 +187,7 @@ document.addEventListener("DOMContentLoaded", function () {
       console.log("🔑 User ID:", userId);
       // FETCH POST con mejor manejo de errores
       try {
-        const response = await fetch(`${API_URL}/incidencias/crear`, {
+        const response = await fetch(`/api/incidencias/crear`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
