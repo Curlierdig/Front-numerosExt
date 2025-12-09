@@ -22,15 +22,14 @@ form.addEventListener("submit", async (e) => {
       headers: {
         "Content-Type": "application/json",
       },
-      // credentials: "include", // <-- Activa si tu backend usa cookies
+      credentials: "include",
       body: JSON.stringify(payload),
     });
 
     if (res.ok) {
       const data = await res.json().catch(() => null);
       alert(data?.message || "Administrador registrado correctamente");
-      // Ejemplo: redirigir al panel de administración
-      // window.location.href = "/admin/panel.html";
+      window.location.href = "/admin/panel.html";
     } else {
       const err = await res.json().catch(() => ({ detail: "Error desconocido" }));
       alert(err.detail || "Error al registrar administrador");

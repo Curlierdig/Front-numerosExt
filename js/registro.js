@@ -1,8 +1,7 @@
-// Selecciona los elementos del DOM
 const municipioSelect = document.getElementById("municipality");
 const otroMunicipioContainer = document.getElementById("otroMunicipioContainer");
 
-// Agrega un "escuchador" para el evento de cambio en el dropdown
+// Agregamos un "escuchador" para el evento de cambio en el dropdown
 municipioSelect.addEventListener("change", function () {
   // Si el valor seleccionado es 'otro'
   if (this.value === "otro") {
@@ -36,7 +35,7 @@ form.addEventListener("submit", async (e) => {
     entidadForanea: document.getElementById("state").value.trim(),
   };
 
-  // Validaciones simples (puedes ampliarlas)
+  // Validaciones simples
   if (!payload.correo || !payload.nombre) {
     alert("Por favor llena al menos correo y nombre completo.");
     return;
@@ -47,22 +46,19 @@ form.addEventListener("submit", async (e) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*", // importante para enviar JSON
+        "Access-Control-Allow-Origin": "*",
       },
-      credentials: "include", // descomenta si tu backend devuelve cookies y quieres que el navegador las guarde
+      credentials: "include",
       body: JSON.stringify(payload),
     });
 
-    // Mostrar estado para depuración
-    console.log("status:", res.status);
+    // console.log("status:", res.status);
 
     if (res.ok) {
       const data = await res.json().catch(() => null);
-      // éxito: redirigir o mostrar mensaje
       alert(data?.message || "Registro exitoso");
-      window.location.href = "/front/login.html"; // descomenta si quieres redirigir
+      window.location.href = "/front/login.html";
     } else {
-      // intentar leer respuesta con error
       const err = await res.json().catch(() => ({ detail: "Error" }));
       console.error("Error response:", err);
       alert(err.detail || "Error en el registro");

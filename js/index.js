@@ -1,6 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // SELECCIONAMOS TODAS LAS PIEZAS
-
   const modalElement = document.getElementById("adminReporteModal");
   // Aseguramos que el modal exista antes de seguir
   if (!modalElement) return;
@@ -30,19 +28,19 @@ document.addEventListener("DOMContentLoaded", function () {
       const token = sessionStorage.getItem("id");
 
       if (!token) {
-        // CASO 1: NO ESTÁ LOGUEADO
-        console.log("Usuario no logueado. Redirigiendo a login...");
+        // NO ESTÁ LOGUEADO
+        //console.log("Usuario no logueado. Redirigiendo a login...");
         // Lo mandamos al login
         window.location.href = "../front/login.html"; // Asegúrate que esta ruta sea correcta
       } else {
-        // CASO 2: SI ESTÁ LOGUEADO
-        console.log("Usuario logueado. Saltando a Step 2.");
+        // SI ESTÁ LOGUEADO
+        //console.log("Usuario logueado. Saltando a Step 2.");
 
         step1.style.display = "none"; // Deshabilitamos los inputs del step1
 
         step1.querySelectorAll("input, select, textarea").forEach((el) => {
           el.disabled = true;
-        }); // Mostramos el paso 2
+        });
 
         step2.style.display = "block";
 
@@ -93,7 +91,7 @@ document.addEventListener("DOMContentLoaded", function () {
     wizardForm.addEventListener("submit", async function (event) {
       // Prevenimos que la página se recargue
       event.preventDefault();
-      console.log("Formulario enviado");
+      //console.log("Formulario enviado");
 
       // Bloqueamos el botón de guardar
       if (saveBtn) {
@@ -102,8 +100,8 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       // Obtenemos el Token de sesión y el ID del usuario
-      const token = sessionStorage.getItem("id");
-      const userId = sessionStorage.getItem("id"); // Esto parece ser lo mismo que token
+      //const token = sessionStorage.getItem("id");
+      const userId = sessionStorage.getItem("id");
 
       // Verificamos que el ID exista
       if (!userId) {
@@ -112,18 +110,15 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
       }
 
-      // Recolectamos los datos (del step 2)
+      // Recolectamos los datos
       const medioContacto = medioContactoSelect.value;
       const medioContactoFinal = medioContacto === "otro" ? document.getElementById("otroMedio").value : medioContacto;
 
-      // ⭐⭐ IMPORTANTE: Construir el objeto EXACTAMENTE como lo espera el backend
-      // Basado en lo que funciona en adminReportes.js
       const requestBody = {
-        // ⭐ Probamos diferentes formatos de idUsuario
-        idUsuario: userId, // Con 'U' mayúscula
-        idusuario: userId, // Todo minúscula (por si acaso)
+        idUsuario: userId,
+        idusuario: userId,
 
-        // Campos del reporte (ajusta según lo que espera el backend)
+        // Campos del reporte
         numeroReportado: document.getElementById("adminNumero").value.trim(),
         categoriaReporte: document.getElementById("adminCategoria").value,
         medioContacto: medioContactoFinal,
@@ -183,15 +178,14 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       }
 
-      console.log("📤 Datos a enviar:", JSON.stringify(requestBody, null, 2));
-      console.log("🔑 User ID:", userId);
+      //console.log("📤 Datos a enviar:", JSON.stringify(requestBody, null, 2));
+      //console.log("🔑 User ID:", userId);
       // FETCH POST con mejor manejo de errores
       try {
         const response = await fetch(`/api/incidencias/crear`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            // Si necesitas Authorization, descomenta la siguiente línea
             // "Authorization": `Bearer ${token}`
           },
           body: JSON.stringify(requestBody),
@@ -199,10 +193,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Obtener la respuesta para debug
         const responseText = await response.text();
-        console.log("📥 Respuesta del servidor:", responseText);
+        //console.log("📥 Respuesta del servidor:", responseText);
 
         if (!response.ok) {
-          // Intentar parsear como JSON para obtener detalles del error
           let errorDetail = "Error desconocido";
           try {
             const errorData = JSON.parse(responseText);
@@ -222,15 +215,12 @@ document.addEventListener("DOMContentLoaded", function () {
           throw new Error(`No se pudo enviar el reporte:\n${errorDetail}`);
         }
 
-        // Si la respuesta fue exitosa
-        console.log("✅ Reporte enviado con éxito");
+        //console.log("✅ Reporte enviado con éxito");
 
         reporteModal.hide(); // Cierra el modal
 
-        // Mostrar mensaje de éxito
         alert("¡Reporte enviado con éxito! Gracias por tu colaboración.");
 
-        // Opcional: limpiar el formulario
         wizardForm.reset();
       } catch (error) {
         console.error("❌ Error al enviar el reporte:", error);
@@ -245,8 +235,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  
-
   // FUNCIÓN DE LIMPIEZA
   // Resetea el modal cuando se cierra
   modalElement.addEventListener("hidden.bs.modal", function () {
@@ -259,7 +247,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Volvemos a HABILITAR los inputs del step1 para la próxima vez
     step1.querySelectorAll("input, select, textarea").forEach((el) => {
       el.disabled = false;
-    }); // Regresa el modal a su estado original (Paso 1 visible)
+    }); // Regresa el modal a su estado original
 
     step1.style.display = "block";
     step2.style.display = "none";

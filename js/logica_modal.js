@@ -1,21 +1,13 @@
-// ============================================================================
-// SISTEMA DE GESTIÓN DE REPORTES - VERSIÓN REFACTORIZADA
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// 1. VARIABLES GLOBALES Y CONFIGURACIÓN INICIAL
-// ----------------------------------------------------------------------------
-
 // Variable para almacenar la instancia de DataTable
 let tabla = null;
 
 // Variable para controlar el modo del modal (crear/editar/ver)
-let modoModal = "ver"; // Valores posibles: 'crear', 'editar', 'ver'
+let modoModal = "ver";
 
 // Variable para almacenar el ID del reporte actual
 let reporteActualId = null;
 
-// Variable para almacenar el ID del usuario actual (si existe)
+// Variable para almacenar el ID del usuario actual
 let usuarioActualId = null;
 
 let datosUsuarioActual = null;
@@ -31,7 +23,7 @@ const TOTAL_PASOS = 3;
 // ----------------------------------------------------------------------------
 
 $(document).ready(function () {
-  console.log("🚀 Iniciando sistema de reportes...");
+  //console.log("Iniciando sistema de reportes...");
 
   // Cargar el nombre del administrador desde sessionStorage
   cargarNombreAdmin();
@@ -47,7 +39,7 @@ $(document).ready(function () {
     verificarPermisos();
   }, 100);
 
-  console.log("✅ Sistema inicializado correctamente");
+  //console.log("Sistema inicializado correctamente");
 });
 
 // ----------------------------------------------------------------------------
@@ -55,71 +47,69 @@ $(document).ready(function () {
 // ----------------------------------------------------------------------------
 
 function cargarNombreAdmin() {
-  console.log("👤 Cargando información del administrador...");
+  //console.log("Cargando información del administrador...");
 
   // Intentar obtener el usuario desde sessionStorage
   const usuarioString = sessionStorage.getItem("usuario");
   const token = sessionStorage.getItem("token");
 
-  console.log("📋 Datos en sessionStorage:");
-  console.log("  - usuarioString:", usuarioString);
-  console.log("  - token:", token ? "Presente" : "No presente");
+  //console.log("Datos en sessionStorage:");
+  //console.log("  - usuarioString:", usuarioString);
+  //console.log("  - token:", token ? "Presente" : "No presente");
 
   // Opción 1: Si existe información del usuario en sessionStorage
   if (usuarioString) {
     try {
       // Convertir el string JSON a objeto
       const usuario = JSON.parse(usuarioString);
-      console.log("📊 Usuario parseado:", usuario);
+      //console.log("Usuario parseado:", usuario);
 
       // Buscar el nombre en diferentes propiedades posibles
       let nombreAdmin = "Admin";
 
       if (usuario.nombre) {
         nombreAdmin = usuario.nombre;
-        console.log("✅ Nombre encontrado en usuario.nombre:", nombreAdmin);
+        //console.log("Nombre encontrado en usuario.nombre:", nombreAdmin);
       } else if (usuario.nombreadmin) {
         nombreAdmin = usuario.nombreadmin;
-        console.log("✅ Nombre encontrado en usuario.nombreadmin:", nombreAdmin);
+        //console.log("Nombre encontrado en usuario.nombreadmin:", nombreAdmin);
       } else if (usuario.nombre_admin) {
         nombreAdmin = usuario.nombre_admin;
-        console.log("✅ Nombre encontrado en usuario.nombre_admin:", nombreAdmin);
+        //console.log("Nombre encontrado en usuario.nombre_admin:", nombreAdmin);
       } else if (usuario.username) {
         nombreAdmin = usuario.username;
-        console.log("✅ Nombre encontrado en usuario.username:", nombreAdmin);
+        //console.log("Nombre encontrado en usuario.username:", nombreAdmin);
       } else if (usuario.correo) {
         // Si solo hay correo, usar la parte antes del @
         nombreAdmin = usuario.correo.split("@")[0];
-        console.log("✅ Nombre derivado del correo:", nombreAdmin);
+        //console.log("Nombre derivado del correo:", nombreAdmin);
       }
 
       // Guardar el nombre en el elemento HTML
       $("#adminUserName").text(nombreAdmin);
 
-      // También guardar el rol si está disponible
+      // También guardar el rol
       if (usuario.rol || usuario.role || usuario.tipousuario) {
         const rol = usuario.rol || usuario.role || usuario.tipousuario;
         sessionStorage.setItem("userRole", rol);
-        console.log("🎭 Rol del usuario:", rol);
+        //console.log("Rol del usuario:", rol);
       }
 
       return;
     } catch (error) {
-      console.error("❌ Error al parsear usuario:", error);
+      //console.error("Error al parsear usuario:", error);
     }
   }
 
-  // Opción 2: Si hay token, intentar decodificarlo para extraer información
+  // Opción 2: Si hay token, intentar extraer información
   if (token) {
     try {
-      console.log("🔍 Intentando decodificar token JWT...");
-
       // Los tokens JWT tienen 3 partes separadas por puntos
       const tokenParts = token.split(".");
       if (tokenParts.length === 3) {
         // La segunda parte (payload) está en base64
         const payload = JSON.parse(atob(tokenParts[1]));
-        console.log("📊 Payload del token:", payload);
+        //console.log("Payload del token:", payload);
 
         // Buscar nombre en el payload del token
         let nombreAdmin = "Admin";
@@ -135,24 +125,24 @@ function cargarNombreAdmin() {
         }
 
         $("#adminUserName").text(nombreAdmin);
-        console.log("✅ Nombre extraído del token:", nombreAdmin);
+        //console.log("Nombre extraído del token:", nombreAdmin);
 
         // Extraer rol del token si existe
         if (payload.rol) {
           sessionStorage.setItem("userRole", payload.rol);
-          console.log("🎭 Rol extraído del token:", payload.rol);
+          //console.log("Rol extraído del token:", payload.rol);
         } else if (payload.role) {
           sessionStorage.setItem("userRole", payload.role);
-          console.log("🎭 Rol extraído del token:", payload.role);
+          //console.log("Rol extraído del token:", payload.role);
         } else if (payload.tipousuario) {
           sessionStorage.setItem("userRole", payload.tipousuario);
-          console.log("🎭 Rol extraído del token:", payload.tipousuario);
+          //console.log("Rol extraído del token:", payload.tipousuario);
         }
 
         return;
       }
     } catch (error) {
-      console.error("❌ Error al decodificar token:", error);
+      console.error("Error al decodificar token:", error);
     }
   }
 
@@ -170,7 +160,7 @@ async function obtenerPerfilAdmin() {
   const token = sessionStorage.getItem("token");
 
   if (!token) {
-    console.log("⚠️ No hay token disponible");
+    //console.log("No hay token disponible");
     $("#adminUserName").text("Invitado");
     return;
   }
@@ -186,7 +176,7 @@ async function obtenerPerfilAdmin() {
 
     if (response.ok) {
       const userData = await response.json();
-      console.log("✅ Perfil obtenido:", userData);
+      //console.log("Perfil obtenido:", userData);
 
       // Guardar en sessionStorage para futuras consultas
       sessionStorage.setItem("usuario", JSON.stringify(userData));
@@ -217,11 +207,11 @@ async function obtenerPerfilAdmin() {
         sessionStorage.setItem("userRole", userData.tipousuario);
       }
     } else {
-      console.warn("⚠️ No se pudo obtener perfil, usando valor por defecto");
+      console.warn("No se pudo obtener perfil, usando valor por defecto");
       $("#adminUserName").text("Admin");
     }
   } catch (error) {
-    console.error("❌ Error obteniendo perfil:", error);
+    console.error("Error obteniendo perfil:", error);
     $("#adminUserName").text("Admin");
   }
 }
@@ -231,17 +221,15 @@ async function obtenerPerfilAdmin() {
 // ----------------------------------------------------------------------------
 
 function inicializarTabla() {
-  console.log("📊 Inicializando DataTable...");
-
   // Inicializar DataTable con configuración
   tabla = $("#tablaReportes").DataTable({
     // Configuración de AJAX para cargar datos desde el servidor
     ajax: {
-      url: `${API_URL}/incidencias/filtrar`, // URL del endpoint
+      url: `/api/incidencias/filtrar`,
       dataSrc: "data", // Propiedad del JSON que contiene los datos
       error: function (xhr, error, code) {
         // Función que se ejecuta si hay error al cargar datos
-        console.error("❌ Error al cargar datos:", error);
+        console.error("Error al cargar datos:", error);
         alert("Error al cargar los datos de la tabla. Por favor, intente de nuevo más tarde.");
       },
     },
@@ -335,8 +323,6 @@ function inicializarTabla() {
     // Cantidad inicial de registros por página
     pageLength: 50,
   });
-
-  console.log("✅ DataTable inicializada");
 }
 
 // ----------------------------------------------------------------------------
@@ -344,10 +330,6 @@ function inicializarTabla() {
 // ----------------------------------------------------------------------------
 
 function configurarEventListeners() {
-  console.log("🔧 Configurando event listeners...");
-
-  // --- BOTONES DEL WIZARD ---
-
   // Evento para mostrar/ocultar campo "otro municipio"
   $("#editMunicipio")
     .off("change")
@@ -439,8 +421,6 @@ function configurarEventListeners() {
   $("#adminReporteModal").on("hidden.bs.modal", function () {
     limpiarModal(); // Limpiar el modal completamente
   });
-
-  console.log("✅ Event listeners configurados");
 }
 
 // ----------------------------------------------------------------------------
@@ -449,8 +429,6 @@ function configurarEventListeners() {
 
 // Actualizar la vista del wizard según el paso actual
 function actualizarVistaWizard() {
-  console.log(`📍 Mostrando paso ${pasoActual} de ${TOTAL_PASOS}`);
-
   // Ocultar todos los pasos
   $(".report-step").hide();
 
@@ -490,8 +468,6 @@ function actualizarVistaWizard() {
 
 // Manejar el botón "Siguiente"
 async function manejarBotonSiguiente() {
-  console.log(`➡️ Avanzando desde paso ${pasoActual}...`);
-
   // --- PASO 1: VALIDACIÓN DE USUARIO ---
   if (pasoActual === 1) {
     // Obtener los valores de teléfono y correo
@@ -500,19 +476,19 @@ async function manejarBotonSiguiente() {
 
     // Validar que ambos campos estén llenos
     if (!telefono || !correo) {
-      alert("⚠️ Por favor ingresa el número de teléfono y el correo electrónico.");
+      alert("Por favor ingresa el número de teléfono y el correo electrónico.");
       return; // Detener la ejecución
     }
 
     // Validar formato de correo
     if (!validarEmail(correo)) {
-      alert("⚠️ Por favor ingresa un correo electrónico válido.");
+      alert("Por favor ingresa un correo electrónico válido.");
       return;
     }
 
     // Validar formato de teléfono (10 dígitos)
     if (!validarTelefono(telefono)) {
-      alert("⚠️ Por favor ingresa un número de teléfono válido (10 dígitos).");
+      alert("Por favor ingresa un número de teléfono válido (10 dígitos).");
       return;
     }
 
@@ -521,13 +497,9 @@ async function manejarBotonSiguiente() {
 
     if (usuarioEncontrado) {
       // Usuario encontrado: saltar al paso 3
-      console.log("✅ Usuario encontrado, saltando al paso 3");
       pasoActual = 3;
       actualizarVistaWizard();
     } else {
-      // Usuario nuevo: ir al paso 2 para llenar datos
-      console.log("ℹ️ Usuario nuevo, ir al paso 2");
-
       // IMPORTANTE: Pre-cargar teléfono y correo en el Paso 2
       $("#editNumeroUsuario").val(telefono);
       $("#editCorreo").val(correo);
@@ -546,8 +518,6 @@ async function manejarBotonSiguiente() {
       return; // Si la validación falla, no avanzar
     }
 
-    console.log("✅ Datos de usuario validados correctamente");
-
     // Registrar al usuario primero
     const registroExitoso = await registrarUsuario();
 
@@ -561,8 +531,6 @@ async function manejarBotonSiguiente() {
 
 // Manejar el botón "Atrás"
 function manejarBotonAtras() {
-  console.log(`⬅️ Retrocediendo desde paso ${pasoActual}...`);
-
   // Si estamos en el paso 3 y hay un usuario cargado, volver al paso 1
   if (pasoActual === 3 && usuarioActualId) {
     pasoActual = 1;
@@ -604,37 +572,37 @@ function validarDatosUsuario() {
 
   // Validar que todos los campos obligatorios estén llenos
   if (!nombre) {
-    alert("⚠️ Por favor ingresa el nombre del usuario.");
+    alert("Por favor ingresa el nombre del usuario.");
     $("#editNombreUsuario").focus();
     return false;
   }
 
   if (!edad || edad < 1 || edad > 120) {
-    alert("⚠️ Por favor ingresa una edad válida (1-120).");
+    alert("Por favor ingresa una edad válida (1-120).");
     $("#editEdad").focus();
     return false;
   }
 
   if (!sexo || sexo === "Seleccionar...") {
-    alert("⚠️ Por favor selecciona el sexo del usuario.");
+    alert("Por favor selecciona el sexo del usuario.");
     $("#editSexo").focus();
     return false;
   }
 
   if (!telefono || !validarTelefono(telefono)) {
-    alert("⚠️ Por favor ingresa un número de teléfono válido (10 dígitos).");
+    alert("Por favor ingresa un número de teléfono válido (10 dígitos).");
     $("#editNumeroUsuario").focus();
     return false;
   }
 
   if (!correo || !validarEmail(correo)) {
-    alert("⚠️ Por favor ingresa un correo electrónico válido.");
+    alert("Por favor ingresa un correo electrónico válido.");
     $("#editCorreo").focus();
     return false;
   }
 
   if (!municipio || municipio === "Seleccionar...") {
-    alert("⚠️ Por favor selecciona el municipio.");
+    alert("Por favor selecciona el municipio.");
     $("#editMunicipio").focus();
     return false;
   }
@@ -653,31 +621,31 @@ function validarDatosReporte() {
 
   // Validar que los campos obligatorios estén llenos
   if (!numeroReportado) {
-    alert("⚠️ Por favor ingresa el número reportado.");
+    alert("Por favor ingresa el número reportado.");
     $("#editNumeroReportado").focus();
     return false;
   }
 
   if (!validarTelefono(numeroReportado)) {
-    alert("⚠️ El número reportado debe tener 10 dígitos.");
+    alert("El número reportado debe tener 10 dígitos.");
     $("#editNumeroReportado").focus();
     return false;
   }
 
   if (!fechaReporte) {
-    alert("⚠️ Por favor selecciona la fecha del reporte.");
+    alert("Por favor selecciona la fecha del reporte.");
     $("#editFechaReporte").focus();
     return false;
   }
 
   if (!categoria) {
-    alert("⚠️ Por favor selecciona la categoría del reporte.");
+    alert("Por favor selecciona la categoría del reporte.");
     $("#editCategoria").focus();
     return false;
   }
 
   if (!medioContacto) {
-    alert("⚠️ Por favor selecciona el medio de contacto.");
+    alert("Por favor selecciona el medio de contacto.");
     $("#editMedioContacto").focus();
     return false;
   }
@@ -688,7 +656,7 @@ function validarDatosReporte() {
   if (tipoDestino === "Tarjeta") {
     const numeroTarjeta = $("#editNumeroTarjeta").val().trim();
     if (!numeroTarjeta || numeroTarjeta.length !== 16) {
-      alert("⚠️ El número de tarjeta debe tener 16 dígitos.");
+      alert("El número de tarjeta debe tener 16 dígitos.");
       $("#editNumeroTarjeta").focus();
       return false;
     }
@@ -697,7 +665,7 @@ function validarDatosReporte() {
   if (tipoDestino === "Ubicacion") {
     const direccion = $("#editDireccion").val().trim();
     if (!direccion) {
-      alert("⚠️ Por favor ingresa la dirección o ubicación.");
+      alert("Por favor ingresa la dirección o ubicación.");
       $("#editDireccion").focus();
       return false;
     }
@@ -712,8 +680,6 @@ function validarDatosReporte() {
 // ----------------------------------------------------------------------------
 
 async function validarUsuario(telefono, correo) {
-  console.log("🔍 Validando usuario en el servidor...");
-
   // Deshabilitar el botón mientras se valida
   $("#nextBtn").prop("disabled", true).text("Validando...");
 
@@ -730,10 +696,7 @@ async function validarUsuario(telefono, correo) {
       credentials: "include",
     });
 
-    // Obtener la respuesta en formato JSON
     const userData = await response.json();
-
-    console.log("📥 Respuesta del servidor:", userData);
 
     // Buscar el ID del usuario en diferentes ubicaciones del JSON
     const idUsuario = userData.id || (userData.user && userData.user.id) || (userData.data && userData.data.id);
@@ -743,8 +706,6 @@ async function validarUsuario(telefono, correo) {
 
     // Si el usuario fue encontrado y autenticado
     if (response.ok && idUsuario) {
-      console.log("✅ Usuario encontrado con ID:", idUsuario);
-
       // Guardar el ID del usuario
       usuarioActualId = idUsuario;
       sessionStorage.setItem("currentUserId", idUsuario);
@@ -761,9 +722,6 @@ async function validarUsuario(telefono, correo) {
       // Retornar true para indicar que el usuario fue encontrado
       return true;
     } else {
-      // Usuario no encontrado o credenciales inválidas
-      console.log("ℹ️ Usuario no encontrado, solicitar datos completos");
-
       // Limpiar el ID del usuario
       usuarioActualId = null;
       sessionStorage.removeItem("currentUserId");
@@ -790,7 +748,7 @@ async function validarUsuario(telefono, correo) {
     }
   } catch (error) {
     // Si hay un error de red o del servidor
-    console.error("❌ Error al validar usuario:", error);
+    console.error("Error al validar usuario:", error);
     alert("Error de conexión al validar el usuario. Por favor, intente nuevamente.");
 
     // Habilitar el botón nuevamente
@@ -804,13 +762,7 @@ async function validarUsuario(telefono, correo) {
 // 9. FUNCIÓN PARA REGISTRAR NUEVO USUARIO
 // ----------------------------------------------------------------------------
 
-// ----------------------------------------------------------------------------
-// 9. FUNCIÓN PARA REGISTRAR NUEVO USUARIO
-// ----------------------------------------------------------------------------
-
 async function registrarUsuario() {
-  console.log("📝 Registrando nuevo usuario...");
-
   // Deshabilitar el botón mientras se registra
   $("#nextBtn").prop("disabled", true).text("Registrando...");
 
@@ -840,9 +792,6 @@ async function registrarUsuario() {
       contrasena: telefono,
     };
 
-    console.log("📤 Enviando datos de registro:", datosUsuario);
-    console.log("🌐 Endpoint:", `/api/auth/registrar`);
-
     // Hacer la petición de registro
     const response = await fetch(`/api/auth/registrar`, {
       method: "POST",
@@ -854,17 +803,14 @@ async function registrarUsuario() {
 
     // Obtener la respuesta
     const result = await response.json();
-    console.log("📥 Respuesta completa del servidor:", result);
 
     if (response.ok) {
-      // ⭐⭐ CORRECCIÓN IMPORTANTE: Manejar la respuesta como array
       let usuarioId = null;
 
       if (Array.isArray(result) && result.length > 0) {
-        // Si la respuesta es un array, tomar el primer elemento
         const usuarioData = result[0];
         usuarioId = usuarioData.idusuario || usuarioData.id;
-        console.log("✅ Extraído ID del usuario del array:", usuarioId);
+        //console.log("Extraído ID del usuario del array:", usuarioId);
       } else if (result.idusuario || result.id) {
         // Si es un objeto simple
         usuarioId = result.idusuario || result.id;
@@ -873,9 +819,6 @@ async function registrarUsuario() {
       if (!usuarioId) {
         throw new Error("No se pudo obtener el ID del usuario de la respuesta");
       }
-
-      console.log("✅ Usuario registrado exitosamente con ID:", usuarioId);
-
       // Guardar el ID del nuevo usuario (como string, no como array)
       usuarioActualId = usuarioId;
       sessionStorage.setItem("currentUserId", usuarioId);
@@ -891,8 +834,6 @@ async function registrarUsuario() {
         vecesreportado: 0,
       };
 
-      console.log("💾 Datos de usuario guardados:", datosUsuarioActual);
-
       // Actualizar el campo de veces reportado
       $("#editVecesReportado").val("0");
 
@@ -907,9 +848,6 @@ async function registrarUsuario() {
 
       return true;
     } else {
-      // Mostrar errores de validación detallados
-      console.error("❌ Error en registro:", result);
-
       let mensajeError = "Error al registrar usuario: ";
 
       if (result.detail && Array.isArray(result.detail)) {
@@ -951,9 +889,6 @@ async function registrarUsuario() {
 
 // Cargar los datos del usuario en los campos del paso 2
 function cargarDatosUsuario(datosUsuario) {
-  console.log("📝 Cargando datos del usuario en el formulario");
-
-  // ⭐ IMPORTANTE: Guardar los datos en la variable global
   datosUsuarioActual = {
     nombreusuario: datosUsuario.nombreusuario || "",
     edad: datosUsuario.edad || "",
@@ -963,8 +898,6 @@ function cargarDatosUsuario(datosUsuario) {
     municipio: datosUsuario.municipio || "",
     vecesreportado: datosUsuario.vecesreportado || 0,
   };
-
-  console.log("💾 Datos guardados en memoria:", datosUsuarioActual);
 
   // Cargar en los campos del formulario
   $("#editNombreUsuario").val(datosUsuarioActual.nombreusuario);
@@ -978,8 +911,6 @@ function cargarDatosUsuario(datosUsuario) {
 
 // Bloquear campos del usuario (solo lectura)
 function bloquearCamposUsuario() {
-  console.log("🔒 Bloqueando campos de usuario");
-
   $("#editNombreUsuario").prop("readonly", true);
   $("#editEdad").prop("readonly", true);
   $("#editSexo").prop("disabled", true);
@@ -991,8 +922,6 @@ function bloquearCamposUsuario() {
 
 // Desbloquear campos del usuario (editables)
 function desbloquearCamposUsuario() {
-  console.log("🔓 Desbloqueando campos de usuario");
-
   $("#editNombreUsuario").prop("readonly", false);
   $("#editEdad").prop("readonly", false);
   $("#editSexo").prop("disabled", false);
@@ -1008,8 +937,6 @@ function desbloquearCamposUsuario() {
 
 // Abrir modal en modo CREAR
 function abrirModalCrear() {
-  console.log("➕ Abriendo modal en modo CREAR");
-
   // Limpiar el modal completamente
   limpiarModal();
 
@@ -1026,7 +953,6 @@ function abrirModalCrear() {
   $("#adminReporteModal").modal("show");
 }
 
-// Abrir modal en modo VER/EDITAR
 // Abrir modal en modo VER/EDITAR
 async function abrirModalVer(reporteId) {
   console.log(`👁️ Abriendo modal en modo VER para reporte ID: ${reporteId}`);
@@ -1065,10 +991,10 @@ async function abrirModalVer(reporteId) {
     // Bloquear algunos campos en modo ver
     bloquearCamposVer();
 
-    console.log("✅ Modal cargado completamente");
+    console.log("Modal cargado completamente");
   } else {
     // Si no se pudieron cargar los datos, cerrar el modal
-    console.error("❌ No se pudieron cargar los datos del reporte");
+    console.error("No se pudieron cargar los datos del reporte");
     $("#adminReporteModal").modal("hide");
     alert("No se pudieron cargar los datos del reporte. Por favor, intente nuevamente.");
   }
@@ -1079,8 +1005,6 @@ async function abrirModalVer(reporteId) {
 // ----------------------------------------------------------------------------
 
 async function cargarReporteCompleto(reporteId) {
-  console.log(`📡 Cargando reporte completo ID: ${reporteId}`);
-
   try {
     // Hacer la petición al servidor
     const response = await fetch(`/api/incidencias/incidencia_completa/${reporteId}`);
@@ -1099,16 +1023,10 @@ async function cargarReporteCompleto(reporteId) {
     }
 
     const reporteCompleto = dataArray[0];
-
-    console.log("✅ Reporte cargado exitosamente");
-    console.log("📊 Datos recibidos del backend:", JSON.stringify(reporteCompleto, null, 2));
-
     // Mostrar todas las claves disponibles
-    console.log("🔑 Claves disponibles en los datos:", Object.keys(reporteCompleto));
-
     return reporteCompleto;
   } catch (error) {
-    console.error("❌ Error al cargar el reporte:", error);
+    console.error("Error al cargar el reporte:", error);
     alert("No se pudo cargar el reporte completo. " + error.message);
     return null;
   }
@@ -1119,9 +1037,6 @@ async function cargarReporteCompleto(reporteId) {
 // ----------------------------------------------------------------------------
 
 function cargarDatosReporte(datos) {
-  console.log("📝 Cargando datos del reporte en el formulario");
-  console.log("📋 Estructura completa de datos recibidos:", datos);
-
   // --- DATOS DEL USUARIO (Paso 2) ---
   $("#editNombreUsuario").val(datos.nombreusuario || datos.nombre || datos.nombre_usuario || "");
   $("#editVecesReportado").val(datos.vecesreportado || datos.veces_reportado || 0);
@@ -1187,15 +1102,6 @@ function cargarDatosReporte(datos) {
 
   // Dirección
   $("#editDireccion").val(datos.direccion || "");
-
-  // Mostrar en consola qué campos se cargaron
-  console.log("✅ Campos cargados:");
-  console.log("  - Nombre:", $("#editNombreUsuario").val());
-  console.log("  - Categoría:", $("#editCategoria").val());
-  console.log("  - Medio Contacto:", $("#editMedioContacto").val());
-  console.log("  - Descripción:", $("#editDescripcion").val());
-  console.log("  - Estatus:", $("#editEstatus").val());
-  console.log("  - Tipo Destino:", $("#editTipoDestino").val());
 }
 
 // ----------------------------------------------------------------------------
@@ -1203,8 +1109,6 @@ function cargarDatosReporte(datos) {
 // ----------------------------------------------------------------------------
 
 function bloquearCamposVer() {
-  console.log("🔒 Bloqueando campos en modo VER");
-
   // Bloquear campos de usuario
   bloquearCamposUsuario();
 
@@ -1221,8 +1125,6 @@ function bloquearCamposVer() {
 // ----------------------------------------------------------------------------
 
 function limpiarModal() {
-  console.log("🧹 Limpiando modal...");
-
   // Resetear el formulario (limpia todos los inputs)
   const formulario = document.getElementById("editReportForm");
   if (formulario) {
@@ -1232,7 +1134,7 @@ function limpiarModal() {
   // Limpiar variables de control
   reporteActualId = null;
   usuarioActualId = null;
-  datosUsuarioActual = null; // ⭐ NUEVO: Limpiar datos de usuario
+  datosUsuarioActual = null;
   modoModal = "ver";
   pasoActual = 1;
 
@@ -1268,8 +1170,6 @@ function limpiarModal() {
 
   // Resetear el wizard al paso 1
   actualizarVistaWizard();
-
-  console.log("✅ Modal limpiado");
 }
 
 // ----------------------------------------------------------------------------
@@ -1277,8 +1177,6 @@ function limpiarModal() {
 // ----------------------------------------------------------------------------
 
 async function guardarReporte() {
-  console.log("💾 Guardando reporte...");
-
   // Validar los datos del reporte antes de guardar
   if (!validarDatosReporte()) {
     return; // Si la validación falla, no continuar
@@ -1287,7 +1185,6 @@ async function guardarReporte() {
   // Determinar si es crear o actualizar
   const esCrear = !reporteActualId;
 
-  // ⭐ IMPORTANTE: Pasar el parámetro esCrear a construirObjetoReporte
   const datosReporte = construirObjetoReporte(esCrear);
 
   // Validación adicional de campos requeridos SOLO para creación
@@ -1296,20 +1193,19 @@ async function guardarReporte() {
     const camposFaltantes = camposRequeridosCreacion.filter((campo) => !datosReporte[campo]);
 
     if (camposFaltantes.length > 0) {
-      alert(`❌ Faltan campos requeridos para crear reporte:\n${camposFaltantes.join(", ")}`);
+      alert(`Faltan campos requeridos para crear reporte:\n${camposFaltantes.join(", ")}`);
       console.error("Campos faltantes para creación:", camposFaltantes);
       return;
     }
   }
 
-  let url = `${API_URL}/incidencias/crear`;
+  let url = `/api/incidencias/crear`;
   let metodo = "POST";
 
   if (!esCrear) {
-    url = `${API_URL}/incidencias/modificar/${reporteActualId}`;
+    url = `/api/incidencias/modificar/${reporteActualId}`;
     metodo = "PUT";
 
-    // ⭐ Para modificación, asegurarnos de enviar SOLO campos modificables
     // Eliminar campos del usuario que no deberían modificarse
     delete datosReporte.idUsuario;
     delete datosReporte.idusuario;
@@ -1324,12 +1220,7 @@ async function guardarReporte() {
     delete datosReporte.numerotarjeta;
     delete datosReporte.numeroreportado;
     delete datosReporte.tipodestino;
-
-    console.log("🔄 Datos para MODIFICACIÓN (sin campos de usuario):", datosReporte);
   }
-
-  console.log(`📤 Enviando ${esCrear ? "CREAR" : "MODIFICAR"} a:`, url);
-  console.log("📦 Datos enviados:", JSON.stringify(datosReporte, null, 2));
 
   try {
     const response = await fetch(url, {
@@ -1342,8 +1233,6 @@ async function guardarReporte() {
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error("❌ Error detallado del servidor:", errorData);
-
       let mensajeError = `Error ${response.status}:\n`;
 
       if (errorData.detail) {
@@ -1365,7 +1254,6 @@ async function guardarReporte() {
     }
 
     const resultado = await response.json();
-    console.log("✅ Respuesta del servidor:", resultado);
 
     // Cerrar modales y limpiar
     $("#confirmationModal").modal("hide");
@@ -1373,10 +1261,10 @@ async function guardarReporte() {
     tabla.ajax.reload();
     limpiarModal();
 
-    alert(esCrear ? "✅ Reporte creado con éxito" : "✅ Reporte actualizado con éxito");
+    alert(esCrear ? "Reporte creado con éxito" : "Reporte actualizado con éxito");
   } catch (error) {
-    console.error("❌ Error al guardar:", error);
-    alert("❌ Error al guardar el reporte:\n" + error.message);
+    console.error("Error al guardar:", error);
+    alert("Error al guardar el reporte:\n" + error.message);
   }
 }
 
@@ -1438,7 +1326,6 @@ function construirObjetoReporte(esCrear = true) {
     direccion: direccion || null,
   };
 
-  // ⭐ PARA CREACIÓN: incluir datos del usuario
   if (esCrear) {
     datos.nombreusuario = datosUsuarioActual?.nombreusuario || $("#editNombreUsuario").val().trim() || null;
     datos.edad = datosUsuarioActual?.edad || parseInt($("#editEdad").val()) || null;
@@ -1458,13 +1345,6 @@ function construirObjetoReporte(esCrear = true) {
     }
   });
 
-  console.log(`📦 Objeto construido para ${esCrear ? "CREAR" : "MODIFICAR"}:`, datos);
-  console.log("✅ Campos requeridos verificados:");
-  console.log("  - idUsuario:", datos.idUsuario ? "✓ Presente" : esCrear ? "✗ Faltante (solo creación)" : "✗ No requerido");
-  console.log("  - numeroReportado:", datos.numeroReportado ? "✓ Presente" : "✗ Faltante");
-  console.log("  - categoriaReporte:", datos.categoriaReporte ? "✓ Presente" : "✗ Faltante");
-  console.log("  - medioContacto:", datos.medioContacto ? "✓ Presente" : "✗ Faltante");
-
   return datos;
 }
 // ----------------------------------------------------------------------------
@@ -1472,18 +1352,14 @@ function construirObjetoReporte(esCrear = true) {
 // ----------------------------------------------------------------------------
 
 async function eliminarReporte() {
-  console.log("🗑️ Eliminando reporte...");
-
   // Verificar que haya un ID de reporte
   if (!reporteActualId) {
-    alert("❌ Error: No se encontró el ID del reporte. No se puede eliminar.");
+    alert("Error: No se encontró el ID del reporte. No se puede eliminar.");
     return;
   }
 
   // Definir la URL del endpoint
-  const url = `${API_URL}/incidencias/eliminar/${reporteActualId}`;
-
-  console.log("📤 Enviando DELETE a:", url);
+  const url = `/api/incidencias/eliminar/${reporteActualId}`;
 
   try {
     // Hacer la petición al servidor
@@ -1496,9 +1372,6 @@ async function eliminarReporte() {
       const errorData = await response.json();
       throw new Error(errorData.detail || "No se pudo eliminar el reporte.");
     }
-
-    console.log("✅ Reporte eliminado exitosamente");
-
     // Cerrar todos los modales
     $("#confirmationModalDelete").modal("hide");
     $("#adminReporteModal").modal("hide");
@@ -1510,10 +1383,10 @@ async function eliminarReporte() {
     limpiarModal();
 
     // Mostrar mensaje de éxito
-    alert("✅ Reporte eliminado con éxito");
+    alert("Reporte eliminado con éxito");
   } catch (error) {
-    console.error("❌ Error al eliminar:", error);
-    alert("❌ Error al eliminar el reporte: " + error.message);
+    console.error("Error al eliminar:", error);
+    alert("Error al eliminar el reporte: " + error.message);
   }
 }
 
@@ -1523,9 +1396,6 @@ async function eliminarReporte() {
 
 function cerrarSesion(e) {
   e.preventDefault();
-
-  console.log("🚪 Cerrando sesión...");
-
   // Limpiar sessionStorage y localStorage
   sessionStorage.clear();
   // Redirigir al login
@@ -1537,33 +1407,25 @@ function cerrarSesion(e) {
 // ----------------------------------------------------------------------------
 
 function verificarPermisos() {
-  console.log("🔐 Verificando permisos de usuario...");
-
   // Obtener el rol del usuario desde sessionStorage
   const rol = sessionStorage.getItem("userRole");
 
   // Si NO es super admin, ocultar elementos específicos
   if (rol !== "superadmin") {
-    console.log("ℹ️ Usuario no es super admin, ocultando elementos");
+    console.log("Usuario no es super admin, ocultando elementos");
 
     // Ocultar todos los elementos con la clase 'super-admin-only'
     document.querySelectorAll(".super-admin-only").forEach((elemento) => {
       elemento.style.setProperty("display", "none", "important");
     });
   } else {
-    console.log("✅ Usuario es super admin");
+    console.log("Usuario es super admin");
   }
 }
 function verificarPermisos() {
-  console.log("🔐 Verificando permisos de usuario...");
-
   // Obtener el rol del usuario desde sessionStorage
   const rol = sessionStorage.getItem("userRole");
   const usuarioString = sessionStorage.getItem("usuario");
-
-  console.log("📋 Información de permisos:");
-  console.log("  - Rol en sessionStorage:", rol);
-  console.log("  - Usuario en sessionStorage:", usuarioString);
 
   // Si NO hay rol en sessionStorage, intentar extraer de otras fuentes
   if (!rol && usuarioString) {
@@ -1573,7 +1435,6 @@ function verificarPermisos() {
 
       if (rolUsuario) {
         sessionStorage.setItem("userRole", rolUsuario);
-        console.log("✅ Rol extraído del usuario:", rolUsuario);
         aplicarPermisos(rolUsuario);
         return;
       }
@@ -1591,22 +1452,16 @@ function aplicarPermisos(rol) {
 
   // Si NO es super admin, ocultar elementos específicos
   if (rol !== "superadmin" && rol !== "super_admin" && rol !== "superadmin" && rol !== "admin_super") {
-    console.log("ℹ️ Usuario no es super admin, ocultando elementos");
-
     // Ocultar todos los elementos con la clase 'super-admin-only'
     document.querySelectorAll(".super-admin-only").forEach((elemento) => {
-      console.log("🚫 Ocultando elemento:", elemento);
       elemento.style.setProperty("display", "none", "important");
     });
 
     // También puedes agregar una clase CSS para mejor control
     document.body.classList.add("no-super-admin");
   } else {
-    console.log("✅ Usuario es super admin, mostrando todos los elementos");
-
     // Mostrar elementos de super admin
     document.querySelectorAll(".super-admin-only").forEach((elemento) => {
-      console.log("✅ Mostrando elemento:", elemento);
       elemento.style.removeProperty("display");
       elemento.style.display = "block"; // O el display original
     });
@@ -1614,7 +1469,3 @@ function aplicarPermisos(rol) {
     document.body.classList.add("super-admin");
   }
 }
-
-// ============================================================================
-// FIN DEL ARCHIVO
-// ============================================================================

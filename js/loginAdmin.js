@@ -13,23 +13,19 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
       credentials: "include",
     });
 
-    console.log(res.status);
+    //console.log(res.status);
 
     if (res.ok) {
-      const data = await res.json(); // Asumimos que la respuesta contiene { id, rol }
+      const data = await res.json();
 
       sessionStorage.setItem(
         "usuario",
         JSON.stringify({
           id: data.id,
           rol: data.rol,
-          nombre: data.nombre, // <-- ¡La clave para el dashboard!
+          nombre: data.nombre, 
         })
       );
-
-      // 🔹 Guardar id y rol en sessionStorage en una sola línea
-      console.log("Login exitoso:", data);
-      // ✅ Redirige al panel
       window.location.href = "/front/panel.html";
     } else {
       alert("Usuario o contraseña incorrectos");
