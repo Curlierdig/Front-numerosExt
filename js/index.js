@@ -106,7 +106,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Verificamos que el ID exista
       if (!userId) {
         alert("Tu sesión ha expirado. Por favor, inicia sesión de nuevo.");
-        window.location.href = "../front/login.html";
+        window.location.href = "../login.html";
         return;
       }
 
