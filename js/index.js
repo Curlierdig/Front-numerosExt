@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // NO ESTÁ LOGUEADO
         //console.log("Usuario no logueado. Redirigiendo a login...");
         // Lo mandamos al login
-        window.location.href = "../login.html"; // Asegúrate que esta ruta sea correcta
+        window.location.href = "../front/login.html"; // Asegúrate que esta ruta sea correcta
       } else {
         // SI ESTÁ LOGUEADO
         //console.log("Usuario logueado. Saltando a Step 2.");
@@ -106,7 +106,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Verificamos que el ID exista
       if (!userId) {
         alert("Tu sesión ha expirado. Por favor, inicia sesión de nuevo.");
-        window.location.href = "../login.html";
+        window.location.href = "../front/login.html";
         return;
       }
 
