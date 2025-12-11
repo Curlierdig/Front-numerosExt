@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // localStorage.setItem("userRole", data.user.role);
       }
 
-      window.location.href = "/front/index.html";
+      window.location.href = "/index.html";
     } catch (error) {
       const alerta = `<div class="alert alert-danger" role="alert">
                               ${error.message}
