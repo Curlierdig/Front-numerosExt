@@ -29,7 +29,7 @@ form.addEventListener("submit", async (e) => {
     if (res.ok) {
       const data = await res.json().catch(() => null);
       alert(data?.message || "Administrador registrado correctamente");
-      window.location.href = "/admin/panel.html";
+      window.location.href = "../panel.html";
     } else {
       const err = await res.json().catch(() => ({ detail: "Error desconocido" }));
       alert(err.detail || "Error al registrar administrador");

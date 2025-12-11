@@ -26,7 +26,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
           nombre: data.nombre, 
         })
       );
-      window.location.href = "/front/panel.html";
+      window.location.href = "../panel.html";
     } else {
       alert("Usuario o contraseña incorrectos");
     }

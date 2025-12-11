@@ -57,7 +57,7 @@ form.addEventListener("submit", async (e) => {
     if (res.ok) {
       const data = await res.json().catch(() => null);
       alert(data?.message || "Registro exitoso");
-      window.location.href = "/front/login.html";
+      window.location.href = "../login.html";
     } else {
       const err = await res.json().catch(() => ({ detail: "Error" }));
       console.error("Error response:", err);

@@ -1399,7 +1399,7 @@ function cerrarSesion(e) {
   // Limpiar sessionStorage y localStorage
   sessionStorage.clear();
   // Redirigir al login
-  window.location.href = "/front/loginAdmin.html";
+  window.location.href = "../loginAdmin.html";
 }
 
 // ----------------------------------------------------------------------------
