@@ -24,13 +24,44 @@ const TOTAL_PASOS = 3;
 
 $(document).ready(function () {
   //console.log("Iniciando sistema de reportes...");
-  const usuario = sessionStorage.getItem("id");
+  const usuarioId = sessionStorage.getItem("id");
 
-  // Si no hay token ni usuario, redirigir al login
-  if (!usuario) {
-    window.location.href = "/front/loginAdmin.html";
-    return; // Detener la ejecución del resto del código
+  if (!usuarioId) {
+    // Ocultar todo el contenido inmediatamente
+    document.body.style.display = "none";
+
+    // Mostrar mensaje de redirección
+    document.body.innerHTML = `
+      <div style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        font-family: Arial, sans-serif;
+      ">
+        <h2>Redirigiendo al inicio de sesión...</h2>
+        <p>No tienes acceso a esta página.</p>
+        <p>Serás redirigido en 3 segundos.</p>
+      </div>
+    `;
+
+    // Redirigir después de mostrar el mensaje
+    setTimeout(() => {
+      window.location.href = "/loginAdmin.html";
+    }, 3000);
+
+    return;
   }
+
+  // Si hay sesión, mostrar el contenido normal
+  document.body.style.display = "block";
 
   // Cargar el nombre del administrador desde sessionStorage
   cargarNombreAdmin();
