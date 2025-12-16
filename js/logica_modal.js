@@ -938,7 +938,7 @@ function validarDatosReporte() {
 }
 
 // ----------------------------------------------------------------------------
-// 8. FUNCIÓN PARA VALIDAR USUARIO EN EL SERVIDOR
+// 8. FUNCIÓN PARA VALIDAR USUARIO EN EL SERVIDOR (MEJORADA)
 // ----------------------------------------------------------------------------
 
 async function validarUsuario(telefono, correo) {
@@ -951,6 +951,8 @@ async function validarUsuario(telefono, correo) {
     formData.append("correo", correo);
     formData.append("contrasena", telefono); // Se usa el teléfono como contraseña
 
+    console.log("🔍 Validando usuario:", { correo, telefono });
+
     // Hacer la petición al servidor
     const response = await fetch(`/api/auth/login`, {
       method: "POST",
@@ -958,16 +960,40 @@ async function validarUsuario(telefono, correo) {
       credentials: "include",
     });
 
-    const userData = await response.json();
+    console.log("📥 Respuesta login - Status:", response.status);
+
+    let userData;
+    try {
+      userData = await response.json();
+      console.log("📥 Respuesta login - Datos:", userData);
+    } catch (e) {
+      console.error("Error parseando respuesta:", e);
+      // Si no es JSON válido, asumir que el usuario no existe
+      userData = {};
+    }
 
     // Buscar el ID del usuario en diferentes ubicaciones del JSON
-    const idUsuario = userData.id || (userData.user && userData.user.id) || (userData.data && userData.data.id);
+    let idUsuario = null;
+    let datosUsuario = {};
 
-    // Determinar qué objeto contiene los datos del usuario
-    const datosUsuario = userData.id ? userData : userData.user || userData.data || {};
+    if (response.ok && userData) {
+      // Intentar extraer datos de diferentes formatos de respuesta
+      if (userData.id || userData.idusuario || userData.id_usuario) {
+        idUsuario = userData.id || userData.idusuario || userData.id_usuario;
+        datosUsuario = userData;
+      } else if (userData.user && (userData.user.id || userData.user.idusuario)) {
+        idUsuario = userData.user.id || userData.user.idusuario;
+        datosUsuario = userData.user;
+      } else if (userData.data && (userData.data.id || userData.data.idusuario)) {
+        idUsuario = userData.data.id || userData.data.idusuario;
+        datosUsuario = userData.data;
+      }
+    }
 
     // Si el usuario fue encontrado y autenticado
-    if (response.ok && idUsuario) {
+    if (idUsuario) {
+      console.log("✅ Usuario encontrado, ID:", idUsuario);
+
       // Guardar el ID del usuario
       usuarioActualId = idUsuario;
       sessionStorage.setItem("currentUserId", idUsuario);
@@ -984,6 +1010,8 @@ async function validarUsuario(telefono, correo) {
       // Retornar true para indicar que el usuario fue encontrado
       return true;
     } else {
+      console.log("❌ Usuario no encontrado o credenciales incorrectas");
+
       // Limpiar el ID del usuario
       usuarioActualId = null;
       sessionStorage.removeItem("currentUserId");
@@ -1009,8 +1037,7 @@ async function validarUsuario(telefono, correo) {
       return false;
     }
   } catch (error) {
-    // Si hay un error de red o del servidor
-    console.error("Error al validar usuario:", error);
+    console.error("❌ Error al validar usuario:", error);
     alert("Error de conexión al validar el usuario. Por favor, intente nuevamente.");
 
     // Habilitar el botón nuevamente
@@ -1019,9 +1046,8 @@ async function validarUsuario(telefono, correo) {
     return false;
   }
 }
-
 // ----------------------------------------------------------------------------
-// 9. FUNCIÓN PARA REGISTRAR NUEVO USUARIO
+// 9. FUNCIÓN PARA REGISTRAR NUEVO USUARIO (CORREGIDA)
 // ----------------------------------------------------------------------------
 
 async function registrarUsuario() {
@@ -1039,10 +1065,10 @@ async function registrarUsuario() {
 
     // Manejar el caso "otro" municipio (si aplica)
     if (municipio === "otro") {
-      municipio = $("#otroMunicipioInput") ? $("#otroMunicipioInput").val().trim() : "No especificado";
+      municipio = $("#otroMunicipioInput").val().trim() || "No especificado";
     }
 
-    // Crear objeto con los datos del usuario
+    // Crear objeto con los datos del usuario - AÑADIR CONTRASEÑA
     const datosUsuario = {
       correo: correo,
       numeroTelefono: telefono,
@@ -1051,8 +1077,10 @@ async function registrarUsuario() {
       sexo: sexo,
       municipio: municipio,
       entidadForanea: "Chihuahua",
-      contrasena: telefono,
+      contrasena: telefono, // <-- ¡ESTE ES EL CAMPO QUE FALTA!
     };
+
+    console.log("📤 Datos usuario a registrar:", datosUsuario);
 
     // Hacer la petición de registro
     const response = await fetch(`/api/auth/registrar`, {
@@ -1063,24 +1091,41 @@ async function registrarUsuario() {
       body: JSON.stringify(datosUsuario),
     });
 
+    console.log("📥 Respuesta del servidor - Status:", response.status);
+
     // Obtener la respuesta
-    const result = await response.json();
+    let result;
+    try {
+      result = await response.json();
+      console.log("📥 Respuesta del servidor - Datos:", result);
+    } catch (e) {
+      console.error("Error parseando JSON:", e);
+      throw new Error("Respuesta inválida del servidor");
+    }
 
     if (response.ok) {
       let usuarioId = null;
 
+      // Diferentes formatos de respuesta posibles
       if (Array.isArray(result) && result.length > 0) {
         const usuarioData = result[0];
         usuarioId = usuarioData.idusuario || usuarioData.id;
-        //console.log("Extraído ID del usuario del array:", usuarioId);
+        console.log("✅ Extraído ID del usuario del array:", usuarioId);
       } else if (result.idusuario || result.id) {
         // Si es un objeto simple
         usuarioId = result.idusuario || result.id;
+        console.log("✅ Extraído ID del usuario del objeto:", usuarioId);
+      } else if (result.data && (result.data.idusuario || result.data.id)) {
+        // Si la respuesta tiene estructura {data: {...}}
+        usuarioId = result.data.idusuario || result.data.id;
+        console.log("✅ Extraído ID del usuario de data:", usuarioId);
       }
 
       if (!usuarioId) {
+        console.error("❌ No se pudo obtener el ID del usuario de la respuesta:", result);
         throw new Error("No se pudo obtener el ID del usuario de la respuesta");
       }
+
       // Guardar el ID del nuevo usuario (como string, no como array)
       usuarioActualId = usuarioId;
       sessionStorage.setItem("currentUserId", usuarioId);
@@ -1109,21 +1154,28 @@ async function registrarUsuario() {
     } else {
       let mensajeError = "Error al registrar usuario: ";
 
-      if (result.detail && Array.isArray(result.detail)) {
-        const errores = result.detail
-          .map((err) => {
-            const campo = err.loc ? err.loc[err.loc.length - 1] : "campo";
-            const msg = err.msg || "Error de validación";
-            return `${campo}: ${msg}`;
-          })
-          .join("\n");
-
-        mensajeError += "\n" + errores;
-      } else if (result.detail) {
-        mensajeError += result.detail;
+      // Manejar diferentes formatos de error
+      if (result.detail) {
+        if (Array.isArray(result.detail)) {
+          const errores = result.detail
+            .map((err) => {
+              const campo = err.loc ? err.loc[err.loc.length - 1] : "campo";
+              const msg = err.msg || "Error de validación";
+              return `${campo}: ${msg}`;
+            })
+            .join("\n");
+          mensajeError += "\n" + errores;
+        } else {
+          mensajeError += result.detail;
+        }
+      } else if (result.message) {
+        mensajeError += result.message;
       } else {
         mensajeError += JSON.stringify(result);
       }
+
+      alert(mensajeError);
+      console.error("❌ Error en registro:", mensajeError);
 
       // Habilitar el botón nuevamente
       $("#nextBtn").prop("disabled", false).text("Siguiente");
@@ -1131,7 +1183,8 @@ async function registrarUsuario() {
       return false;
     }
   } catch (error) {
-    alert("Error al registrar el usuario");
+    console.error("❌ Error en registro:", error);
+    alert("Error al registrar el usuario: " + error.message);
 
     // Habilitar el botón nuevamente
     $("#nextBtn").prop("disabled", false).text("Siguiente");
