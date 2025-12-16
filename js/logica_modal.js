@@ -1351,7 +1351,7 @@ function cargarDatosReporte(datos) {
   $("#editTipoDestino").val(tipoDestino).trigger("change"); // Trigger para mostrar/ocultar campos
 
   // Número de tarjeta
-  $("#editNumeroTarjeta").val(datos.numerotarjeta || datos.numeroTarjeta || datos.numero_tarjeta || "");
+  $("#editNumeroTarjeta").val(datos.numeroTarjeta || datos.numero_tarjeta || "");
 
   // Dirección
   $("#editDireccion").val(datos.direccion || "");
