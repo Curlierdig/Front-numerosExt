@@ -24,11 +24,10 @@ const TOTAL_PASOS = 3;
 
 $(document).ready(function () {
   //console.log("Iniciando sistema de reportes...");
-  const token = sessionStorage.getItem("token");
   const usuario = sessionStorage.getItem("usuario");
 
   // Si no hay token ni usuario, redirigir al login
-  if (!token && !usuario) {
+  if (!usuario) {
     window.location.href = "/front/loginAdmin.html";
     return; // Detener la ejecución del resto del código
   }
