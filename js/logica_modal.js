@@ -1426,7 +1426,11 @@ function limpiarModal() {
 }
 
 // ----------------------------------------------------------------------------
-// 16. FUNCIÓN PARA GUARDAR EL REPORTE (CREAR O ACTUALIZAR)
+// 16. FUNCIÓN PARA GUARDAR EL REPORTE (CREAR O ACTUALIZAR) - CORREGIDA
+// ----------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------
+// 16. FUNCIÓN PARA GUARDAR EL REPORTE (CREAR O ACTUALIZAR) - CORREGIDA
 // ----------------------------------------------------------------------------
 
 async function guardarReporte() {
@@ -1440,9 +1444,11 @@ async function guardarReporte() {
 
   const datosReporte = construirObjetoReporte(esCrear);
 
+  console.log("📦 Datos reporte ANTES de limpieza:", datosReporte);
+
   // Validación adicional de campos requeridos SOLO para creación
   if (esCrear) {
-    const camposRequeridosCreacion = ["idUsuario", "numeroReportado", "categoriaReporte", "medioContacto"];
+    const camposRequeridosCreacion = ["idusuario", "numeroreportado", "categoriareporte", "mediocontacto"];
     const camposFaltantes = camposRequeridosCreacion.filter((campo) => !datosReporte[campo]);
 
     if (camposFaltantes.length > 0) {
@@ -1459,7 +1465,8 @@ async function guardarReporte() {
     url = `/api/incidencias/modificar/${reporteActualId}`;
     metodo = "PUT";
 
-    // Eliminar campos del usuario que no deberían modificarse
+    // CORREGIDO: NO eliminar tipodestino y otros campos importantes
+    // Solo eliminar campos del usuario que no deberían modificarse
     delete datosReporte.idUsuario;
     delete datosReporte.idusuario;
     delete datosReporte.nombreusuario;
@@ -1468,19 +1475,33 @@ async function guardarReporte() {
     delete datosReporte.numerotelefono;
     delete datosReporte.correousuario;
     delete datosReporte.municipio;
-    delete datosReporte.direccion;
-    delete datosReporte.mediocontacto;
-    delete datosReporte.numerotarjeta;
-    delete datosReporte.numeroreportado;
-    delete datosReporte.tipodestino;
+
+    // NO eliminar estos campos (son parte del reporte):
+    // delete datosReporte.direccion;       // <-- MANTENER
+    // delete datosReporte.mediocontacto;   // <-- MANTENER
+    // delete datosReporte.numerotarjeta;   // <-- MANTENER
+    // delete datosReporte.numeroreportado; // <-- MANTENER
+    // delete datosReporte.tipodestino;     // <-- ¡ESTE ES EL PROBLEMA!
+  }
+
+  // AGREGAR HEADERS DE AUTENTICACIÓN
+  const headers = {
+    "Content-Type": "application/json",
+  };
+
+  // Agregar token si existe
+  const token = sessionStorage.getItem("token");
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
   }
 
   try {
+    console.log(`📤 Enviando ${metodo} a ${url}`);
+    console.log("📦 Datos a enviar:", datosReporte);
+
     const response = await fetch(url, {
       method: metodo,
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: headers,
       body: JSON.stringify(datosReporte),
     });
 
@@ -1490,7 +1511,6 @@ async function guardarReporte() {
 
       if (errorData.detail) {
         if (Array.isArray(errorData.detail)) {
-          // Mostrar cada error de validación
           errorData.detail.forEach((err, index) => {
             const campo = err.loc ? err.loc[err.loc.length - 1] : "campo";
             const msg = err.msg || "Error de validación";
@@ -1500,27 +1520,33 @@ async function guardarReporte() {
           mensajeError += errorData.detail;
         }
       } else {
-        mensajeError += "Error desconocido del servidor";
+        mensajeError += JSON.stringify(errorData);
       }
 
       throw new Error(mensajeError);
     }
 
     const resultado = await response.json();
+    console.log("✅ Respuesta del servidor:", resultado);
 
     // Cerrar modales y limpiar
     $("#confirmationModal").modal("hide");
     $("#adminReporteModal").modal("hide");
     tabla.ajax.reload();
     limpiarModal();
+
+    // Mostrar mensaje de éxito
+    setTimeout(() => {
+      alert(`✅ Reporte ${esCrear ? "creado" : "actualizado"} exitosamente`);
+    }, 300);
   } catch (error) {
-    console.error("Error al guardar:", error);
-    alert("Error al guardar el reporte.");
+    console.error("❌ Error al guardar:", error);
+    alert(`❌ Error al ${esCrear ? "crear" : "actualizar"} el reporte:\n${error.message}`);
   }
 }
 
 // ----------------------------------------------------------------------------
-// 17. FUNCIÓN PARA CONSTRUIR EL OBJETO DE DATOS DEL REPORTE
+// 17. FUNCIÓN PARA CONSTRUIR EL OBJETO DE DATOS DEL REPORTE (MEJORADA)
 // ----------------------------------------------------------------------------
 
 function construirObjetoReporte(esCrear = true) {
@@ -1539,6 +1565,11 @@ function construirObjetoReporte(esCrear = true) {
   const tipoDestino = $("#editTipoDestino").val();
   const numeroTarjeta = $("#editNumeroTarjeta").val().trim();
   const direccion = $("#editDireccion").val().trim();
+
+  // Depuración: ver qué valor tiene tipoDestino
+  console.log("🔍 Valor de editTipoDestino:", tipoDestino);
+  console.log("🔍 Valor de editNumeroTarjeta:", numeroTarjeta);
+  console.log("🔍 Valor de editDireccion:", direccion);
 
   // Extraer idusuario correctamente SOLO para creación
   let idUsuarioValue = null;
@@ -1559,9 +1590,6 @@ function construirObjetoReporte(esCrear = true) {
 
   // Construir objeto base
   const datos = {
-    // Campos requeridos para creación (opcional para modificación)
-    idUsuario: esCrear ? idUsuarioValue : undefined,
-
     // Campos del reporte (siempre se envían)
     numeroreportado: numeroReportado || null,
     categoriareporte: categoria || null,
@@ -1572,21 +1600,46 @@ function construirObjetoReporte(esCrear = true) {
     genero: genero || "No especificado",
     supuestotrabajo: supuestoTrabajo || null,
     estatus: estatus || "Pendiente",
-    tipodestino: tipoDestino === "Ninguno" ? null : tipoDestino,
+
+    // IMPORTANTE: Siempre enviar tipodestino, incluso si es "Ninguno"
+    tipodestino: tipoDestino,
+
+    // Enviar estos campos solo si tienen valor
     numerotarjeta: numeroTarjeta || null,
     direccion: direccion || null,
   };
 
-  if (esCrear) {
-    datos.nombreusuario = datosUsuarioActual?.nombreusuario || $("#editNombreUsuario").val().trim() || null;
-    datos.edad = datosUsuarioActual?.edad || parseInt($("#editEdad").val()) || null;
-    datos.sexo = datosUsuarioActual?.sexo || $("#editSexo").val() || null;
-    datos.numerotelefono = datosUsuarioActual?.numerotelefono || $("#editNumeroUsuario").val().trim() || null;
-    datos.correousuario = datosUsuarioActual?.correousuario || $("#editCorreo").val().trim() || null;
-    datos.municipio = datosUsuarioActual?.municipio || $("#editMunicipio").val() || null;
-
-    // Versión en minúscula también por si acaso
+  // Solo para creación, agregar idusuario
+  if (esCrear && idUsuarioValue) {
     datos.idusuario = idUsuarioValue;
+
+    // También agregar datos del usuario si existen
+    if (datosUsuarioActual) {
+      datos.nombreusuario = datosUsuarioActual.nombreusuario || null;
+      datos.edad = datosUsuarioActual.edad || null;
+      datos.sexo = datosUsuarioActual.sexo || null;
+      datos.numerotelefono = datosUsuarioActual.numerotelefono || null;
+      datos.correousuario = datosUsuarioActual.correousuario || null;
+      datos.municipio = datosUsuarioActual.municipio || null;
+    }
+  }
+
+  // IMPORTANTE: Manejar el caso especial cuando tipoDestino es "Ninguno"
+  // Si el tipo de destino es "Ninguno", limpiar los campos relacionados
+  if (tipoDestino === "Ninguno" || !tipoDestino) {
+    datos.tipodestino = null;
+    datos.numerotarjeta = null;
+    datos.direccion = null;
+  }
+
+  // Si tipoDestino es "tarjeta", limpiar dirección
+  if (tipoDestino === "tarjeta") {
+    datos.direccion = null;
+  }
+
+  // Si tipoDestino es "ubicacion", limpiar número de tarjeta
+  if (tipoDestino === "ubicacion") {
+    datos.numerotarjeta = null;
   }
 
   // Limpiar campos undefined (no enviarlos)
@@ -1594,8 +1647,14 @@ function construirObjetoReporte(esCrear = true) {
     if (datos[key] === undefined) {
       delete datos[key];
     }
+
+    // También limpiar campos vacíos (string vacío)
+    if (datos[key] === "") {
+      datos[key] = null;
+    }
   });
 
+  console.log("📤 Datos finales a enviar:", datos);
   return datos;
 }
 // ----------------------------------------------------------------------------
