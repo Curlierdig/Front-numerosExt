@@ -1,3 +1,226 @@
+(function verificarSesionInmediata() {
+  // Solo ejecutar si estamos en panel.html
+  if (window.location.pathname.includes("/panel.html") || window.location.pathname.endsWith("panel.html") || document.title.toLowerCase().includes("panel")) {
+    // VERIFICACIÓN MEJORADA: Buscar múltiples posibles almacenamientos de sesión
+    let tieneSesion = false;
+
+    // 1. Verificar si hay usuario en sessionStorage
+    const usuarioString = sessionStorage.getItem("usuario");
+    if (usuarioString) {
+      try {
+        const usuario = JSON.parse(usuarioString);
+        if (usuario && (usuario.id || usuario.idusuario || usuario.id_usuario)) {
+          tieneSesion = true;
+          console.log("✅ Sesión encontrada en 'usuario'");
+        }
+      } catch (e) {
+        console.warn("Error parsing usuario:", e);
+      }
+    }
+
+    // 2. Verificar si hay token
+    const token = sessionStorage.getItem("token");
+    if (token && !tieneSesion) {
+      tieneSesion = true;
+      console.log("✅ Sesión encontrada por token");
+    }
+
+    // 3. Verificar si hay id directamente (tu intento original)
+    const idDirecto = sessionStorage.getItem("id");
+    if (idDirecto && !tieneSesion) {
+      tieneSesion = true;
+      console.log("✅ Sesión encontrada por 'id' directo");
+    }
+
+    // 4. Verificar si hay currentUserId (usado en tu código)
+    const currentUserId = sessionStorage.getItem("currentUserId");
+    if (currentUserId && !tieneSesion) {
+      tieneSesion = true;
+      console.log("✅ Sesión encontrada por 'currentUserId'");
+    }
+
+    // Si NO tiene sesión, mostrar bloqueo
+    if (!tieneSesion) {
+      console.warn("⚠️ No se encontró sesión válida, bloqueando acceso");
+
+      // Crear overlay de bloqueo visual
+      const overlayHTML = `
+                <!DOCTYPE html>
+                <html lang="es">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Acceso Restringido</title>
+                    <style>
+                        * {
+                            margin: 0;
+                            padding: 0;
+                            box-sizing: border-box;
+                        }
+                        
+                        body {
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            min-height: 100vh;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            padding: 20px;
+                        }
+                        
+                        .overlay-container {
+                            background: rgba(255, 255, 255, 0.1);
+                            backdrop-filter: blur(10px);
+                            padding: 40px;
+                            border-radius: 15px;
+                            max-width: 500px;
+                            width: 100%;
+                            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                            border: 1px solid rgba(255, 255, 255, 0.2);
+                            text-align: center;
+                            color: white;
+                        }
+                        
+                        .spinner {
+                            width: 80px;
+                            height: 80px;
+                            border: 3px solid rgba(255, 255, 255, 0.3);
+                            border-top: 3px solid white;
+                            border-radius: 50%;
+                            animation: spin 1s linear infinite;
+                            margin: 0 auto 30px;
+                        }
+                        
+                        h1 {
+                            font-size: 2rem;
+                            margin-bottom: 15px;
+                            font-weight: 600;
+                        }
+                        
+                        p {
+                            font-size: 1.1rem;
+                            margin-bottom: 25px;
+                            line-height: 1.6;
+                            opacity: 0.9;
+                        }
+                        
+                        .button-group {
+                            display: flex;
+                            gap: 15px;
+                            justify-content: center;
+                            margin-top: 30px;
+                            flex-wrap: wrap;
+                        }
+                        
+                        .btn {
+                            background: white;
+                            color: #667eea;
+                            border: none;
+                            padding: 12px 30px;
+                            border-radius: 50px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            font-size: 1rem;
+                            transition: all 0.3s ease;
+                            text-decoration: none;
+                            display: inline-block;
+                        }
+                        
+                        .btn-secondary {
+                            background: transparent;
+                            color: white;
+                            border: 2px solid rgba(255, 255, 255, 0.3);
+                        }
+                        
+                        .btn:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                        }
+                        
+                        .btn-secondary:hover {
+                            background: rgba(255,255,255,0.1);
+                        }
+                        
+                        .countdown {
+                            margin-top: 30px;
+                            font-size: 0.9rem;
+                            opacity: 0.7;
+                        }
+                        
+                        @keyframes spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }
+                        
+                        .debug-info {
+                            margin-top: 20px;
+                            padding: 10px;
+                            background: rgba(0,0,0,0.2);
+                            border-radius: 5px;
+                            font-size: 0.8rem;
+                            text-align: left;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="overlay-container">
+                        <div class="spinner"></div>
+                        <h1>🔒 Acceso Restringido</h1>
+                        <p>Debes iniciar sesión para acceder al panel de administración.</p>
+                        
+                        <div class="button-group">
+                            <a href="/front/loginAdmin.html" class="btn">Ir al Login</a>
+                            <button onclick="location.reload()" class="btn btn-secondary">Reintentar</button>
+                        </div>
+                        
+                        <div class="countdown">
+                            Redirección automática en <span id="countdown">5</span> segundos
+                        </div>
+                        
+                        <div class="debug-info">
+                            <strong>Debug info:</strong><br>
+                            Usuario: ${usuarioString ? "Presente" : "No encontrado"}<br>
+                            Token: ${token ? "Presente" : "No encontrado"}<br>
+                            ID directo: ${idDirecto || "No encontrado"}<br>
+                            currentUserId: ${currentUserId || "No encontrado"}
+                        </div>
+                    </div>
+                    
+                    <script>
+                        // Contador regresivo
+                        let seconds = 5;
+                        const countdownElement = document.getElementById('countdown');
+                        const countdownInterval = setInterval(() => {
+                            seconds--;
+                            if (countdownElement) {
+                                countdownElement.textContent = seconds;
+                            }
+                            if (seconds <= 0) {
+                                clearInterval(countdownInterval);
+                                window.location.replace("/front/loginAdmin.html");
+                            }
+                        }, 1000);
+                        
+                        // Redirección automática después de 5 segundos
+                        setTimeout(() => {
+                            window.location.replace("/front/loginAdmin.html");
+                        }, 5000);
+                    </script>
+                </body>
+                </html>
+            `;
+
+      // Reemplazar todo el contenido del documento
+      document.write(overlayHTML);
+      document.close();
+
+      // Prevenir cualquier ejecución adicional de JavaScript
+      throw new Error("Sesión no válida - Redirigiendo a login");
+    } else {
+      console.log("✅ Sesión válida detectada, continuando...");
+    }
+  }
+})();
 // Variable para almacenar la instancia de DataTable
 let tabla = null;
 
@@ -24,44 +247,11 @@ const TOTAL_PASOS = 3;
 
 $(document).ready(function () {
   //console.log("Iniciando sistema de reportes...");
-  const usuarioId = sessionStorage.getItem("id");
 
-  if (!usuarioId) {
-    // Ocultar todo el contenido inmediatamente
-    document.body.style.display = "none";
-
-    // Mostrar mensaje de redirección
-    document.body.innerHTML = `
-      <div style="
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: white;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-        font-family: Arial, sans-serif;
-      ">
-        <h2>Redirigiendo al inicio de sesión...</h2>
-        <p>No tienes acceso a esta página.</p>
-        <p>Serás redirigido en 3 segundos.</p>
-      </div>
-    `;
-
-    // Redirigir después de mostrar el mensaje
-    setTimeout(() => {
-      window.location.href = "/loginAdmin.html";
-    }, 3000);
-
-    return;
+  if (document.body) {
+    document.body.style.display = "block";
+    document.body.style.visibility = "visible";
   }
-
-  // Si hay sesión, mostrar el contenido normal
-  document.body.style.display = "block";
 
   // Cargar el nombre del administrador desde sessionStorage
   cargarNombreAdmin();
