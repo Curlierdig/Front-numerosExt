@@ -1059,8 +1059,8 @@ async function registrarUsuario() {
     const nombre = $("#editNombreUsuario").val().trim();
     const edad = parseInt($("#editEdad").val());
     const sexo = $("#editSexo").val();
-    const telefono = $("#editNumeroUsuario").val().trim();
-    const correo = $("#editCorreo").val().trim();
+    const telefono = $("#phoneLogin").val().trim();
+    const correo = $("#emailLogin").val().trim();
     let municipio = $("#editMunicipio").val();
 
     // Manejar el caso "otro" municipio (si aplica)
