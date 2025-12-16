@@ -447,15 +447,53 @@ async function obtenerPerfilAdmin() {
 // ----------------------------------------------------------------------------
 
 function inicializarTabla() {
+  // Obtener token para las peticiones
+  const token = sessionStorage.getItem("token");
+  const usuarioString = sessionStorage.getItem("usuario");
+
+  // Configurar headers para DataTables
+  const headers = {};
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  } else if (usuarioString) {
+    try {
+      const usuario = JSON.parse(usuarioString);
+      if (usuario.token) {
+        headers["Authorization"] = `Bearer ${usuario.token}`;
+      }
+    } catch (e) {
+      console.warn("No se pudo obtener token para tabla:", e);
+    }
+  }
+
   // Inicializar DataTable con configuración
   tabla = $("#tablaReportes").DataTable({
     // Configuración de AJAX para cargar datos desde el servidor
     ajax: {
       url: `/api/incidencias/filtrar`,
       dataSrc: "data", // Propiedad del JSON que contiene los datos
+      headers: headers, // <-- AGREGAR HEADERS DE AUTENTICACIÓN AQUÍ
+      xhrFields: {
+        withCredentials: true, // Si tu API usa cookies/sesión
+      },
       error: function (xhr, error, code) {
         // Función que se ejecuta si hay error al cargar datos
         console.error("Error al cargar datos:", error);
+        console.error("Status:", xhr.status);
+        console.error("Response:", xhr.responseText);
+
+        // Si es error de autenticación (401/403)
+        if (xhr.status === 401 || xhr.status === 403) {
+          console.warn("Token expirado o inválido. Limpiando sesión...");
+          sessionStorage.clear();
+
+          // Mostrar alerta y redirigir
+          setTimeout(() => {
+            alert("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.");
+            window.location.href = "/front/loginAdmin.html";
+          }, 100);
+        }
       },
     },
 
@@ -549,7 +587,6 @@ function inicializarTabla() {
     pageLength: 50,
   });
 }
-
 // ----------------------------------------------------------------------------
 // 5. FUNCIÓN PARA CONFIGURAR TODOS LOS EVENT LISTENERS
 // ----------------------------------------------------------------------------
