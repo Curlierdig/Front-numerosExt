@@ -1051,24 +1051,20 @@ async function validarUsuario(telefono, correo) {
 // ----------------------------------------------------------------------------
 
 async function registrarUsuario() {
-  // Deshabilitar el botón mientras se registra
   $("#nextBtn").prop("disabled", true).text("Registrando...");
 
   try {
-    // Obtener los valores del formulario
     const nombre = $("#editNombreUsuario").val().trim();
-    const edad = parseInt($("#editEdad").val());
+    const edad = parseInt($("#editEdad").val()) || 0;
     const sexo = $("#editSexo").val();
     const telefono = $("#phoneLogin").val().trim();
     const correo = $("#emailLogin").val().trim();
     let municipio = $("#editMunicipio").val();
 
-    // Manejar el caso "otro" municipio (si aplica)
     if (municipio === "otro") {
       municipio = $("#otroMunicipioInput").val().trim() || "No especificado";
     }
 
-    // Crear objeto con los datos del usuario - AÑADIR CONTRASEÑA
     const datosUsuario = {
       correo: correo,
       numeroTelefono: telefono,
@@ -1081,55 +1077,42 @@ async function registrarUsuario() {
 
     console.log("📤 Datos usuario a registrar:", datosUsuario);
 
-    // Hacer la petición de registro
     const response = await fetch(`/api/auth/registrar`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(datosUsuario),
     });
 
-    console.log("📥 Respuesta del servidor - Status:", response.status);
-
-    // Obtener la respuesta
     let result;
     try {
       result = await response.json();
-      console.log("📥 Respuesta del servidor - Datos:", result);
     } catch (e) {
-      console.error("Error parseando JSON:", e);
-      throw new Error("Respuesta inválida del servidor");
+      throw new Error("El servidor no envió una respuesta JSON válida.");
     }
 
     if (response.ok) {
+      // --- LÓGICA DE ÉXITO ---
       let usuarioId = null;
 
-      // Diferentes formatos de respuesta posibles
-      if (Array.isArray(result) && result.length > 0) {
-        const usuarioData = result[0];
-        usuarioId = usuarioData.idusuario || usuarioData.id;
-        console.log("✅ Extraído ID del usuario del array:", usuarioId);
-      } else if (result.idusuario || result.id) {
-        // Si es un objeto simple
+      // Intentar extraer ID
+      if (result.idusuario || result.id) {
         usuarioId = result.idusuario || result.id;
-        console.log("✅ Extraído ID del usuario del objeto:", usuarioId);
-      } else if (result.data && (result.data.idusuario || result.data.id)) {
-        // Si la respuesta tiene estructura {data: {...}}
-        usuarioId = result.data.idusuario || result.data.id;
-        console.log("✅ Extraído ID del usuario de data:", usuarioId);
+      } else if (Array.isArray(result) && result[0]) {
+        usuarioId = result[0].idusuario || result[0].id;
+      } else if (result.data?.id) {
+        usuarioId = result.data.id;
       }
 
+      // Si el servidor NO manda ID pero la respuesta es OK (200/201)
+      // Usamos el teléfono como ID temporal o permitimos continuar
       if (!usuarioId) {
-        console.error("❌ No se pudo obtener el ID del usuario de la respuesta:", result);
-        throw new Error("No se pudo obtener el ID del usuario de la respuesta");
+        console.warn("⚠️ El servidor confirmó registro pero no envió ID. Usando teléfono como referencia.");
+        usuarioId = telefono;
       }
 
-      // Guardar el ID del nuevo usuario (como string, no como array)
       usuarioActualId = usuarioId;
       sessionStorage.setItem("currentUserId", usuarioId);
 
-      // Guardar también los datos del usuario en la variable global
       datosUsuarioActual = {
         nombreusuario: nombre,
         edad: edad,
@@ -1140,54 +1123,36 @@ async function registrarUsuario() {
         vecesreportado: 0,
       };
 
-      // Actualizar el campo de veces reportado
       $("#editVecesReportado").val("0");
-
-      // Bloquear los campos del paso 2 (solo lectura)
       bloquearCamposUsuario();
-
-      // Habilitar el botón nuevamente
       $("#nextBtn").prop("disabled", false).text("Siguiente");
 
       return true;
     } else {
-      let mensajeError = "Error al registrar usuario: ";
+      // --- LÓGICA DE ERROR (Aquí cae el 400 Bad Request) ---
+      let mensajeError = "Error: ";
 
-      // Manejar diferentes formatos de error
       if (result.detail) {
+        // Si el detalle es un array (errores de validación de FastAPI/Python)
         if (Array.isArray(result.detail)) {
-          const errores = result.detail
-            .map((err) => {
-              const campo = err.loc ? err.loc[err.loc.length - 1] : "campo";
-              const msg = err.msg || "Error de validación";
-              return `${campo}: ${msg}`;
-            })
-            .join("\n");
-          mensajeError += "\n" + errores;
+          mensajeError += result.detail.map((d) => d.msg).join(", ");
         } else {
-          mensajeError += result.detail;
+          mensajeError += result.detail; // "Ya existe un usuario con este..."
         }
-      } else if (result.message) {
-        mensajeError += result.message;
+      } else if (result.mensaje || result.message) {
+        mensajeError += result.mensaje || result.message;
       } else {
-        mensajeError += JSON.stringify(result);
+        mensajeError += "Datos inválidos o usuario duplicado.";
       }
 
       alert(mensajeError);
-      console.error("❌ Error en registro:", mensajeError);
-
-      // Habilitar el botón nuevamente
       $("#nextBtn").prop("disabled", false).text("Siguiente");
-
       return false;
     }
   } catch (error) {
-    console.error("❌ Error en registro:", error);
-    alert("Error al registrar el usuario: " + error.message);
-
-    // Habilitar el botón nuevamente
+    console.error("❌ Error fatal:", error);
+    alert("Ocurrió un error inesperado: " + error.message);
     $("#nextBtn").prop("disabled", false).text("Siguiente");
-
     return false;
   }
 }
