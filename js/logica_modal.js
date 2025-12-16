@@ -1077,7 +1077,6 @@ async function registrarUsuario() {
       sexo: sexo,
       municipio: municipio,
       entidadForanea: "Chihuahua",
-      contrasena: telefono, // <-- ¡ESTE ES EL CAMPO QUE FALTA!
     };
 
     console.log("📤 Datos usuario a registrar:", datosUsuario);
