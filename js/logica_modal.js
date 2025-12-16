@@ -24,6 +24,14 @@ const TOTAL_PASOS = 3;
 
 $(document).ready(function () {
   //console.log("Iniciando sistema de reportes...");
+  const token = sessionStorage.getItem("token");
+  const usuario = sessionStorage.getItem("usuario");
+
+  // Si no hay token ni usuario, redirigir al login
+  if (!token && !usuario) {
+    window.location.href = "/front/loginAdmin.html";
+    return; // Detener la ejecución del resto del código
+  }
 
   // Cargar el nombre del administrador desde sessionStorage
   cargarNombreAdmin();
@@ -155,8 +163,6 @@ function cargarNombreAdmin() {
 // ----------------------------------------------------------------------------
 
 async function obtenerPerfilAdmin() {
-  console.log("🌐 Intentando obtener perfil del admin desde API...");
-
   const token = sessionStorage.getItem("token");
 
   if (!token) {
@@ -230,7 +236,6 @@ function inicializarTabla() {
       error: function (xhr, error, code) {
         // Función que se ejecuta si hay error al cargar datos
         console.error("Error al cargar datos:", error);
-        alert("Error al cargar los datos de la tabla. Por favor, intente de nuevo más tarde.");
       },
     },
 
@@ -843,9 +848,6 @@ async function registrarUsuario() {
       // Habilitar el botón nuevamente
       $("#nextBtn").prop("disabled", false).text("Siguiente");
 
-      // Mostrar mensaje de éxito
-      alert("✅ Usuario registrado exitosamente. Ahora puedes completar el reporte.");
-
       return true;
     } else {
       let mensajeError = "Error al registrar usuario: ";
@@ -866,16 +868,13 @@ async function registrarUsuario() {
         mensajeError += JSON.stringify(result);
       }
 
-      alert(mensajeError);
-
       // Habilitar el botón nuevamente
       $("#nextBtn").prop("disabled", false).text("Siguiente");
 
       return false;
     }
   } catch (error) {
-    console.error("❌ Error al registrar usuario:", error);
-    alert("❌ Error al registrar el usuario: " + error.message);
+    alert("Error al registrar el usuario");
 
     // Habilitar el botón nuevamente
     $("#nextBtn").prop("disabled", false).text("Siguiente");
@@ -955,8 +954,6 @@ function abrirModalCrear() {
 
 // Abrir modal en modo VER/EDITAR
 async function abrirModalVer(reporteId) {
-  console.log(`👁️ Abriendo modal en modo VER para reporte ID: ${reporteId}`);
-
   // Limpiar el modal completamente
   limpiarModal();
 
@@ -1026,8 +1023,7 @@ async function cargarReporteCompleto(reporteId) {
     // Mostrar todas las claves disponibles
     return reporteCompleto;
   } catch (error) {
-    console.error("Error al cargar el reporte:", error);
-    alert("No se pudo cargar el reporte completo. " + error.message);
+    alert("No se pudo cargar el reporte completo. ");
     return null;
   }
 }
@@ -1260,11 +1256,9 @@ async function guardarReporte() {
     $("#adminReporteModal").modal("hide");
     tabla.ajax.reload();
     limpiarModal();
-
-    alert(esCrear ? "Reporte creado con éxito" : "Reporte actualizado con éxito");
   } catch (error) {
     console.error("Error al guardar:", error);
-    alert("Error al guardar el reporte:\n" + error.message);
+    alert("Error al guardar el reporte.");
   }
 }
 
@@ -1381,12 +1375,8 @@ async function eliminarReporte() {
 
     // Limpiar el modal
     limpiarModal();
-
-    // Mostrar mensaje de éxito
-    alert("Reporte eliminado con éxito");
   } catch (error) {
     console.error("Error al eliminar:", error);
-    alert("Error al eliminar el reporte: " + error.message);
   }
 }
 
@@ -1448,22 +1438,18 @@ function verificarPermisos() {
 
 // Función auxiliar para aplicar permisos
 function aplicarPermisos(rol) {
-  console.log("🎭 Aplicando permisos para rol:", rol);
-
   // Si NO es super admin, ocultar elementos específicos
   if (rol !== "superadmin" && rol !== "super_admin" && rol !== "superadmin" && rol !== "admin_super") {
     // Ocultar todos los elementos con la clase 'super-admin-only'
     document.querySelectorAll(".super-admin-only").forEach((elemento) => {
       elemento.style.setProperty("display", "none", "important");
     });
-
-    // También puedes agregar una clase CSS para mejor control
     document.body.classList.add("no-super-admin");
   } else {
     // Mostrar elementos de super admin
     document.querySelectorAll(".super-admin-only").forEach((elemento) => {
       elemento.style.removeProperty("display");
-      elemento.style.display = "block"; // O el display original
+      elemento.style.display = "block";
     });
 
     document.body.classList.add("super-admin");
