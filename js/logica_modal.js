@@ -24,7 +24,7 @@ const TOTAL_PASOS = 3;
 
 $(document).ready(function () {
   //console.log("Iniciando sistema de reportes...");
-  const usuario = sessionStorage.getItem("usuario");
+  const usuario = sessionStorage.getItem("id");
 
   // Si no hay token ni usuario, redirigir al login
   if (!usuario) {
