@@ -1047,7 +1047,7 @@ async function validarUsuario(telefono, correo) {
   }
 }
 // ----------------------------------------------------------------------------
-// 9. FUNCIÓN PARA REGISTRAR NUEVO USUARIO (CORREGIDA)
+// 9. FUNCIÓN PARA REGISTRAR NUEVO USUARIO (ACTUALIZADA)
 // ----------------------------------------------------------------------------
 
 async function registrarUsuario() {
@@ -1057,14 +1057,15 @@ async function registrarUsuario() {
     const nombre = $("#editNombreUsuario").val().trim();
     const edad = parseInt($("#editEdad").val()) || 0;
     const sexo = $("#editSexo").val();
-    const telefono = $("#phoneLogin").val().trim();
-    const correo = $("#emailLogin").val().trim();
+    const telefono = $("#phoneLogin").val().trim(); // Usar teléfono del paso 1
+    const correo = $("#emailLogin").val().trim(); // Usar correo del paso 1
     let municipio = $("#editMunicipio").val();
 
     if (municipio === "otro") {
       municipio = $("#otroMunicipioInput").val().trim() || "No especificado";
     }
 
+    // IMPORTANTE: Agregar el campo 'contrasena' que falta
     const datosUsuario = {
       correo: correo,
       numeroTelefono: telefono,
@@ -1073,6 +1074,7 @@ async function registrarUsuario() {
       sexo: sexo,
       municipio: municipio,
       entidadForanea: "Chihuahua",
+      contrasena: telefono, // <-- ¡AGREGAR ESTE CAMPO!
     };
 
     console.log("📤 Datos usuario a registrar:", datosUsuario);
@@ -1091,28 +1093,60 @@ async function registrarUsuario() {
     }
 
     if (response.ok) {
-      // --- LÓGICA DE ÉXITO ---
-      let usuarioId = null;
+      console.log("✅ Registro exitoso:", result);
 
-      // Intentar extraer ID
-      if (result.idusuario || result.id) {
-        usuarioId = result.idusuario || result.id;
+      // CASO 1: El servidor NO devuelve ID explícito, pero sí éxito
+      if (result.mensaje && result.mensaje.includes("exitosamente")) {
+        console.log("⚠️ El servidor confirmó registro pero no envió ID explícito.");
+        console.log("🔄 Intentando obtener ID del usuario recién registrado...");
+
+        // Opción A: Intentar obtener el usuario por teléfono/correo
+        try {
+          const usuarioObtenido = await obtenerUsuarioPorCredenciales(correo, telefono);
+          if (usuarioObtenido && usuarioObtenido.idusuario) {
+            usuarioActualId = usuarioObtenido.idusuario;
+            console.log("✅ ID obtenido después del registro:", usuarioActualId);
+          } else {
+            // Opción B: Si no podemos obtener el ID, usar un placeholder
+            console.warn("⚠️ No se pudo obtener ID después del registro. Usando teléfono como referencia.");
+            usuarioActualId = telefono;
+          }
+        } catch (error) {
+          console.warn("⚠️ Error al obtener usuario después del registro:", error);
+          usuarioActualId = telefono; // Usar teléfono como ID temporal
+        }
+      }
+      // CASO 2: El servidor SÍ devuelve ID
+      else if (result.idusuario || result.id) {
+        usuarioActualId = result.idusuario || result.id;
+        console.log("✅ ID recibido directamente:", usuarioActualId);
       } else if (Array.isArray(result) && result[0]) {
-        usuarioId = result[0].idusuario || result[0].id;
+        usuarioActualId = result[0].idusuario || result[0].id;
+        console.log("✅ ID recibido en array:", usuarioActualId);
       } else if (result.data?.id) {
-        usuarioId = result.data.id;
+        usuarioActualId = result.data.id;
+        console.log("✅ ID recibido en data:", usuarioActualId);
+      } else {
+        // Si llegamos aquí, usar teléfono como referencia temporal
+        console.warn("⚠️ No se encontró ID en la respuesta. Usando teléfono como referencia.");
+        usuarioActualId = telefono;
       }
 
-      // Si el servidor NO manda ID pero la respuesta es OK (200/201)
-      // Usamos el teléfono como ID temporal o permitimos continuar
-      if (!usuarioId) {
-        console.warn("⚠️ El servidor confirmó registro pero no envió ID. Usando teléfono como referencia.");
-        usuarioId = telefono;
-      }
+      // Guardar en sessionStorage
+      sessionStorage.setItem("currentUserId", usuarioActualId);
 
-      usuarioActualId = usuarioId;
-      sessionStorage.setItem("currentUserId", usuarioId);
+      // IMPORTANTE: También guardar los datos del usuario recién registrado
+      sessionStorage.setItem(
+        "usuarioRecienRegistrado",
+        JSON.stringify({
+          id: usuarioActualId,
+          nombre: nombre,
+          correo: correo,
+          telefono: telefono,
+        })
+      );
 
+      // Guardar datos en variable global
       datosUsuarioActual = {
         nombreusuario: nombre,
         edad: edad,
@@ -1123,21 +1157,27 @@ async function registrarUsuario() {
         vecesreportado: 0,
       };
 
+      // Actualizar campos del formulario
       $("#editVecesReportado").val("0");
+      $("#editNumeroUsuario").val(telefono); // Asegurar que el teléfono esté en el campo
+      $("#editCorreo").val(correo); // Asegurar que el correo esté en el campo
+
+      // Bloquear campos del paso 2 (solo lectura)
       bloquearCamposUsuario();
+
+      // Habilitar botón
       $("#nextBtn").prop("disabled", false).text("Siguiente");
 
       return true;
     } else {
-      // --- LÓGICA DE ERROR (Aquí cae el 400 Bad Request) ---
+      // Manejar error
       let mensajeError = "Error: ";
 
       if (result.detail) {
-        // Si el detalle es un array (errores de validación de FastAPI/Python)
         if (Array.isArray(result.detail)) {
           mensajeError += result.detail.map((d) => d.msg).join(", ");
         } else {
-          mensajeError += result.detail; // "Ya existe un usuario con este..."
+          mensajeError += result.detail;
         }
       } else if (result.mensaje || result.message) {
         mensajeError += result.mensaje || result.message;
@@ -1154,6 +1194,44 @@ async function registrarUsuario() {
     alert("Ocurrió un error inesperado: " + error.message);
     $("#nextBtn").prop("disabled", false).text("Siguiente");
     return false;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// FUNCIÓN AUXILIAR PARA OBTENER USUARIO POR CREDENCIALES
+// ----------------------------------------------------------------------------
+
+async function obtenerUsuarioPorCredenciales(correo, telefono) {
+  try {
+    // Intentar obtener el usuario que acabamos de registrar
+    // Opción 1: Intentar login para obtener ID
+    const formData = new FormData();
+    formData.append("correo", correo);
+    formData.append("contrasena", telefono); // Usar teléfono como contraseña
+
+    const response = await fetch(`/api/auth/login`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (response.ok) {
+      const userData = await response.json();
+
+      // Buscar ID en diferentes ubicaciones
+      if (userData.idusuario || userData.id) {
+        return { idusuario: userData.idusuario || userData.id };
+      } else if (userData.user?.idusuario) {
+        return { idusuario: userData.user.idusuario };
+      } else if (userData.data?.idusuario) {
+        return { idusuario: userData.data.idusuario };
+      }
+    }
+
+    // Si no funciona, retornar null
+    return null;
+  } catch (error) {
+    console.warn("Error al obtener usuario por credenciales:", error);
+    return null;
   }
 }
 // ----------------------------------------------------------------------------
@@ -1591,20 +1669,17 @@ function construirObjetoReporte(esCrear = true) {
   // Extraer idusuario correctamente SOLO para creación
   let idUsuarioValue = null;
   if (esCrear && usuarioActualId) {
-    if (Array.isArray(usuarioActualId) && usuarioActualId.length > 0) {
-      const usuarioObj = usuarioActualId[0];
-      idUsuarioValue = usuarioObj.idusuario || usuarioObj.id || usuarioObj.idUsuario;
-    } else if (typeof usuarioActualId === "string") {
+    // Si usuarioActualId es un número de teléfono (10 dígitos)
+    if (typeof usuarioActualId === "string" && /^\d{10}$/.test(usuarioActualId)) {
+      console.log("⚠️ Usando teléfono como referencia para usuario:", usuarioActualId);
+      // En este caso, el backend debería buscar el usuario por teléfono
       idUsuarioValue = usuarioActualId;
-    } else if (usuarioActualId.idusuario) {
-      idUsuarioValue = usuarioActualId.idusuario;
-    } else if (usuarioActualId.id) {
-      idUsuarioValue = usuarioActualId.id;
-    } else if (usuarioActualId.idUsuario) {
-      idUsuarioValue = usuarioActualId.idUsuario;
+    }
+    // Si es un ID normal
+    else if (typeof usuarioActualId === "string" || typeof usuarioActualId === "number") {
+      idUsuarioValue = usuarioActualId;
     }
   }
-
   // Construir objeto base
   const datos = {
     // Campos del reporte (siempre se envían)
