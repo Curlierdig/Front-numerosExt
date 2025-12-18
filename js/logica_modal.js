@@ -466,29 +466,47 @@ function inicializarTabla() {
       console.warn("No se pudo obtener token para tabla:", e);
     }
   }
+  let cursores = {};
 
-  // Inicializar DataTable con configuración
   tabla = $("#tablaReportes").DataTable({
-    // Configuración de AJAX para cargar datos desde el servidor
+    processing: true,
+    serverSide: true,
+
     ajax: {
       url: `/api/incidencias/filtrar`,
-      dataSrc: "data", // Propiedad del JSON que contiene los datos
-      headers: headers, // <-- AGREGAR HEADERS DE AUTENTICACIÓN AQUÍ
-      xhrFields: {
-        withCredentials: true, // Si tu API usa cookies/sesión
+      type: "GET",
+      dataSrc: function (json) {
+        // página actual
+        let pagina = tabla.page.info().page;
+
+        // guardar cursor para la siguiente página
+        if (json.data && json.data.length > 0) {
+          cursores[pagina] = json.data[json.data.length - 1].fechareporte;
+        }
+
+        return json.data;
       },
-      error: function (xhr, error, code) {
-        // Función que se ejecuta si hay error al cargar datos
+      data: function (d) {
+        let pagina = Math.floor(d.start / d.length);
+
+        return {
+          // backend
+          limite: d.length,
+          cursor_fecha: cursores[pagina - 1] || null,
+          "search[value]": d.search.value,
+          orden_desc: d.order[0].dir === "desc",
+          columna_orden: d.columns[d.order[0].column].data,
+        };
+      },
+      headers: headers,
+      xhrFields: {
+        withCredentials: true,
+      },
+      error: function (xhr, error) {
         console.error("Error al cargar datos:", error);
-        console.error("Status:", xhr.status);
-        console.error("Response:", xhr.responseText);
 
-        // Si es error de autenticación (401/403)
         if (xhr.status === 401 || xhr.status === 403) {
-          console.warn("Token expirado o inválido. Limpiando sesión...");
           sessionStorage.clear();
-
-          // Mostrar alerta y redirigir
           setTimeout(() => {
             alert("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.");
             window.location.href = "/front/loginAdmin.html";
@@ -497,47 +515,38 @@ function inicializarTabla() {
       },
     },
 
-    // Definición de columnas
     columns: [
-      // Columna 1: ID (oculta)
       {
         data: "idreporte",
-        visible: false, // No se muestra en la tabla
-        searchable: false, // No se puede buscar por esta columna
+        visible: false,
+        searchable: false,
       },
-      // Columna 2: Nombre del Usuario
       {
         data: "nombre_usuario",
-        className: "text-center", // Centrar el texto
+        className: "text-center",
       },
-      // Columna 3: Número Reportado
       {
         data: "numeroreportado",
         className: "text-center",
       },
-      // Columna 4: Categoría
       {
         data: "categoriareporte",
         className: "text-center",
       },
-      // Columna 5: Fecha del Reporte
       {
         data: "fechareporte",
         className: "text-center",
       },
-      // Columna 6: Estatus (con formato de badge)
       {
         data: "estatus",
         className: "text-center",
-        render: function (data, type, row) {
-          // Función para personalizar cómo se muestra el estatus
-          let color = "secondary"; // Color por defecto
-          let textColor = ""; // Color del texto
+        render: function (data) {
+          let color = "secondary";
+          let textColor = "";
 
-          // Asignar color según el estatus
           if (data === "Pendiente") {
             color = "warning";
-            textColor = "text-dark"; // Texto oscuro para amarillo
+            textColor = "text-dark";
           } else if (data === "Resuelto") {
             color = "success";
           } else if (data === "En Proceso") {
@@ -546,47 +555,43 @@ function inicializarTabla() {
             color = "dark";
           }
 
-          // Retornar el HTML del badge
           return `<span class="badge bg-${color} ${textColor}">${data}</span>`;
         },
       },
-      // Columna 7: Botón de Acciones
       {
-        data: null, // No viene de los datos, es generada
-        orderable: false, // No se puede ordenar por esta columna
-        searchable: false, // No se puede buscar por esta columna
+        data: null,
+        orderable: false,
+        searchable: false,
         render: function (data, type, row) {
-          // Crear botón Ver/Editar con el ID del reporte
-          return `<button class="btn btn-sm btn-primary btn-ver-reporte" data-id="${row.idreporte}">
-                    <i class="bi bi-pencil-square"></i> Ver/Editar
-                  </button>`;
+          return `
+          <button class="btn btn-sm btn-primary btn-ver-reporte"
+            data-id="${row.idreporte}">
+            <i class="bi bi-pencil-square"></i> Ver/Editar
+          </button>`;
         },
       },
     ],
 
-    // Configuración de idioma (español)
     language: {
       url: "https://cdn.datatables.net/plug-ins/2.0.5/i18n/es-MX.json",
     },
 
-    // Hacer la tabla responsive (adaptable a móviles)
     responsive: true,
 
-    // Configuración del layout (botones de exportar, longitud de página)
     layout: {
       topStart: {
-        buttons: ["csv", "excel", "pdf", "print"], // Botones de exportación
+        buttons: ["csv", "excel", "pdf", "print"],
       },
-      topEnd: "pageLength", // Selector de número de registros por página
+      topEnd: "pageLength",
     },
 
-    // Opciones de cantidad de registros por página
     lengthMenu: [50, 75, 100],
-
-    // Cantidad inicial de registros por página
     pageLength: 50,
   });
 }
+tabla.on("search.dt order.dt length.dt", function () {
+  cursores = {};
+});
 // ----------------------------------------------------------------------------
 // 5. FUNCIÓN PARA CONFIGURAR TODOS LOS EVENT LISTENERS
 // ----------------------------------------------------------------------------
