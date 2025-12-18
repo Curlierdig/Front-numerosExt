@@ -1404,7 +1404,7 @@ function limpiarModal() {
   // ... tu código de limpieza ...
 
   // Reseteamos el formulario
-  $("#formReporte")[0].reset();
+  $("#editReporForm")[0].reset();
 
   // --- RESUCITAR EL BOTÓN  ---
   $("#prevBtn").show();
