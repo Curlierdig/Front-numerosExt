@@ -992,17 +992,17 @@ async function registrarUsuario() {
   $("#nextBtn").prop("disabled", true).text("Registrando...");
 
   try {
-    // 1. Recolección de datos
+    // --- RECOLECCIÓN DE DATOS ---
     const nombre = $("#editNombreUsuario").val().trim();
-    const edad = parseInt($("#editEdad").val()) || 0;
-    const sexo = $("#editSexo").val();
-    const telefono = $("#phoneLogin").val().trim(); // Usar teléfono del paso 1
-    const correo = $("#emailLogin").val().trim(); // Usar correo del paso 1
-    let municipio = $("#editMunicipio").val();
+    // Validamos edad (si viene vacía ponemos 0)
+    const edadVal = $("#editEdad").val();
+    const edad = edadVal ? parseInt(edadVal) : 0;
 
-    if (municipio === "otro") {
-      municipio = $("#otroMunicipioInput").val().trim() || "No especificado";
-    }
+    const sexo = $("#editSexo").val();
+    const telefono = $("#phoneLogin").val().trim();
+    const correo = $("#emailLogin").val().trim();
+    let municipio = $("#editMunicipio").val();
+    if (municipio === "otro") municipio = $("#otroMunicipioInput").val().trim() || "No especificado";
 
     const datosUsuario = {
       correo: correo,
@@ -1012,126 +1012,104 @@ async function registrarUsuario() {
       sexo: sexo,
       municipio: municipio,
       entidadForanea: "Chihuahua",
-      contrasena: telefono, // Se usa el teléfono como contraseña inicial
+      contrasena: telefono,
     };
 
-    console.log("📤 Datos usuario a registrar:", datosUsuario);
+    console.log("📤 Enviando registro:", datosUsuario);
 
-    // 2. Petición al servidor
     const response = await fetch(`/api/auth/registrar`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(datosUsuario),
     });
 
-    // Intentamos parsear la respuesta, si falla devolvemos objeto vacío
     let result = {};
     try {
       result = await response.json();
-    } catch (e) {
-      console.warn("La respuesta no fue un JSON válido");
-    }
+    } catch (e) {}
 
     if (response.ok) {
-      console.log("📥 Respuesta del servidor:", result);
+      console.log("📥 Respuesta servidor:", result);
 
-      // --- LÓGICA DE EXTRACCIÓN DE ID (CORREGIDA) ---
+      // --- 🔍 LÓGICA DE EXTRACCIÓN PROFUNDA DE UUID ---
       let idFinal = null;
 
-      // Lista de posibles ubicaciones del ID en la respuesta
-      // Convertimos a int para validar si es número real
-      const candidatos = [result.idusuario, result.id, result.data?.idusuario, result.data?.id, Array.isArray(result) ? result[0]?.idusuario : null];
-
-      // Buscamos el primer candidato que sea un NÚMERO válido
-      for (const val of candidatos) {
-        // Validamos: que exista, que no sea la frase prohibida, y que no sea un objeto vacío
-        if (val && val !== "Registro exitoso" && typeof val !== "object" && String(val).trim() !== "") {
-          // Opcional: Si tus IDs siempre son cortos, puedes validar longitud,
-          // pero si son UUIDs largos, mejor solo checa que no sea el mensaje.
-          if (String(val).includes("exitosamente")) continue;
-
-          idFinal = val; // Guardamos el valor tal cual (sea numero o string)
-          break;
-        }
+      // 1. Intentamos la ruta exacta que vimos en tu log:
+      // result.idusuario.data.idusuario
+      if (result.idusuario && result.idusuario.data && result.idusuario.data.idusuario) {
+        idFinal = result.idusuario.data.idusuario;
+      }
+      // 2. Intentamos rutas alternativas comunes
+      else if (result.idusuario && typeof result.idusuario !== "object") {
+        idFinal = result.idusuario; // Si viniera directo
+      } else if (result.data && result.data.idusuario) {
+        idFinal = result.data.idusuario;
+      } else if (result.id) {
+        idFinal = result.id;
       }
 
-      // CASO DE EMERGENCIA: Si no encontramos ID numérico (porque devolvió solo texto)
+      // IMPORTANTE: El ID es un string largo, NO lo conviertas a número con parseInt
+
+      // SI NO ENCONTRAMOS ID, PROBAMOS MANUALMENTE
       if (!idFinal) {
-        console.warn("⚠️ El registro fue exitoso pero no recibimos ID numérico. Buscando manualmente...");
-
-        // Llamamos a la función auxiliar para buscar el ID usando las credenciales
+        console.warn("⚠️ Estructura desconocida. Buscando manualmente...");
         const usuarioRecuperado = await obtenerUsuarioPorCredenciales(correo, telefono);
-
         if (usuarioRecuperado && usuarioRecuperado.idusuario) {
-          idFinal = parseInt(usuarioRecuperado.idusuario);
-          console.log("✅ ID recuperado tras búsqueda manual:", idFinal);
+          idFinal = usuarioRecuperado.idusuario;
         }
       }
 
-      // --- VALIDACIÓN FINAL Y GUARDADO ---
-      if (idFinal && !isNaN(idFinal)) {
-        // 1. Guardar ID en variable global y Storage
+      console.log("🔍 ID UUID detectado:", idFinal);
+
+      // --- VALIDACIÓN Y GUARDADO ---
+      if (idFinal && typeof idFinal === "string" && idFinal.length > 0) {
         usuarioActualId = idFinal;
-        sessionStorage.setItem("currentUserId", idFinal);
+        sessionStorage.setItem("currentUserId", idFinal); // Guardamos el UUID tal cual
 
-        // 2. Guardar respaldo del usuario
-        const respaldoUsuario = {
-          id: idFinal,
-          nombre: nombre,
-          correo: correo,
-          telefono: telefono,
-          edad: edad,
-          sexo: sexo,
-          municipio: municipio,
-        };
-        sessionStorage.setItem("usuarioRecienRegistrado", JSON.stringify(respaldoUsuario));
+        // Respaldo
+        sessionStorage.setItem(
+          "usuarioRecienRegistrado",
+          JSON.stringify({
+            id: idFinal,
+            nombre,
+            correo,
+            telefono,
+          })
+        );
 
-        // 3. Actualizar variable global de datos
+        // Actualizamos datos globales
         datosUsuarioActual = {
           nombreusuario: nombre,
-          edad: edad,
-          sexo: sexo,
+          edad,
+          sexo,
           numerotelefono: telefono,
           correousuario: correo,
-          municipio: municipio,
+          municipio,
           vecesreportado: 0,
         };
 
-        console.log("✅ ID REAL GUARDADO EN SESSION:", idFinal);
+        console.log("✅ UUID GUARDADO EN SESSION:", idFinal);
 
-        // 4. Preparar UI para el siguiente paso
+        // Limpieza UI
         $("#editVecesReportado").val("0");
         $("#editNumeroUsuario").val(telefono);
         $("#editCorreo").val(correo);
-
         bloquearCamposUsuario();
         $("#nextBtn").prop("disabled", false).text("Siguiente");
-
         return true;
       } else {
-        // Si llegamos aquí, se registró en la BD pero el Front no tiene el ID.
-        console.error("❌ ERROR CRÍTICO: Usuario registrado pero ID no encontrado.");
-        alert("El registro fue exitoso, pero hubo un problema al iniciar sesión automáticamente. Por favor recarga e intenta validar tu número.");
+        console.error("❌ ERROR: No se pudo extraer el UUID.");
+        alert("Registro exitoso, pero no se pudo obtener el ID del usuario. Inicia sesión manual.");
         $("#nextBtn").prop("disabled", false).text("Siguiente");
         return false;
       }
     } else {
-      // Manejo de errores del servidor (400, 500, etc.)
-      let mensajeError = "Error al registrar.";
-
-      if (result.detail) {
-        mensajeError += " " + (Array.isArray(result.detail) ? result.detail.map((d) => d.msg).join(", ") : result.detail);
-      } else if (result.mensaje || result.message) {
-        mensajeError += " " + (result.mensaje || result.message);
-      }
-
-      alert(mensajeError);
+      alert("Error del servidor: " + (result.mensaje || "Desconocido"));
       $("#nextBtn").prop("disabled", false).text("Siguiente");
       return false;
     }
   } catch (error) {
-    console.error("❌ Error fatal en registro:", error);
-    alert("Ocurrió un error inesperado: " + error.message);
+    console.error("❌ Error fatal:", error);
     $("#nextBtn").prop("disabled", false).text("Siguiente");
     return false;
   }
@@ -1585,43 +1563,31 @@ async function guardarReporte() {
 // ----------------------------------------------------------------------------
 
 function construirObjetoReporte(esCrear = true) {
-  console.log(`🔨 Construyendo objeto de datos del reporte (${esCrear ? "CREAR" : "MODIFICAR"})`);
+  console.log(`🔨 Construyendo reporte (${esCrear ? "CREAR" : "MODIFICAR"})`);
 
-  // --- 1. OBTENCIÓN DEL ID (BLINDADA) ---
-  let rawId = sessionStorage.getItem("currentUserId");
+  // --- 1. OBTENCIÓN DEL UUID (SIN PARSEINT) ---
+  let idFinal = sessionStorage.getItem("currentUserId");
 
-  // Si no está en session, buscamos en variable global
-  if (!rawId || rawId === "undefined" || rawId === "null") {
-    if (typeof usuarioActualId !== "undefined") {
-      rawId = usuarioActualId;
-    }
+  if (!idFinal || idFinal === "undefined" || idFinal === "null") {
+    idFinal = usuarioActualId;
   }
 
-  // Convertimos a entero (si tu ID es numérico)
-  let idFinal = parseInt(rawId);
-
-  // IMPORTANTE: Si tu ID tiene letras, quita el parseInt y usa: idFinal = rawId;
-
-  // Validamos que tengamos un ID real
+  // Validación: Que sea string y no sea el mensaje de éxito
   if (esCrear) {
-    // Si idFinal es NaN, o 0, o nulo...
-    if (!idFinal || (typeof idFinal === "number" && isNaN(idFinal))) {
-      console.error("❌ ERROR FATAL: No hay ID válido para el reporte. Valor:", rawId);
-      alert("Error: No se detectó el usuario. Por favor recarga la página.");
-      return null; // ¡ABORTAR MISIÓN!
+    if (!idFinal || idFinal === "Registro exitoso" || idFinal.length < 5) {
+      console.error("❌ ERROR: UUID inválido:", idFinal);
+      alert("Error: ID de usuario perdido. Recarga la página.");
+      return null;
     }
   }
 
-  // --- 2. CONSTRUCCIÓN DEL OBJETO (TODO MINÚSCULAS) ---
-  // Según tu último error, el servidor exige: idusuario, numeroreportado, categoriareporte, mediocontacto
+  // --- 2. OBJETO CON CAMPOS EN MINÚSCULAS ---
   const datos = {
-    // ⚠️ TODO EN MINÚSCULAS AQUÍ ⚠️
-    idusuario: idFinal,
+    idusuario: idFinal, // ✅ Se va como String (UUID)
     numeroreportado: $("#editNumeroReportado").val().trim() || null,
     categoriareporte: $("#editCategoria").val() || null,
     mediocontacto: $("#editMedioContacto").val() || null,
 
-    // El resto también en minúsculas para no errarle
     fechareporte: $("#editFechaReporte").val() || (esCrear ? new Date().toISOString().split("T")[0] : null),
     descripcion: $("#editDescripcion").val().trim() || null,
     supuestonombre: $("#editSupuestoNombre").val().trim() || null,
@@ -1645,12 +1611,9 @@ function construirObjetoReporte(esCrear = true) {
     datos.numerotarjeta = null;
   }
 
-  // Si es edición, quitamos el ID
-  if (!esCrear) {
-    delete datos.idusuario;
-  }
+  if (!esCrear) delete datos.idusuario;
 
-  console.log("📤 Datos listos (Minúsculas forzadas):", datos);
+  console.log("📤 Datos reporte listos:", datos);
   return datos;
 }
 // ----------------------------------------------------------------------------
