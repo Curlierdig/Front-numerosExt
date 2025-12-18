@@ -998,8 +998,9 @@ async function registrarUsuario() {
 
   try {
     const adminSession = sessionStorage.getItem("usuario"); // Recuperamos lo que guardó obtenerPerfilAdmin
-
+    console.log(adminSession);
     id = adminSession.id;
+    console.log(id);
     const nombre = $("#editNombreUsuario").val().trim();
     // Validamos edad (si viene vacía ponemos 0)
     const edadVal = $("#editEdad").val();
