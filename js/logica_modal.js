@@ -1000,6 +1000,10 @@ async function registrarUsuario() {
     const adminSession = JSON.parse(sessionStorage.getItem("usuario"));
     console.log(adminSession);
     id = adminSession.id;
+    console.log(adminSession.id)
+    console.log(typeof adminSession); // debe imprimir "object"
+console.log(adminSession.id);     // debe imprimir el UUID
+
     console.log(id);
     const nombre = $("#editNombreUsuario").val().trim();
     // Validamos edad (si viene vacía ponemos 0)
