@@ -1236,14 +1236,16 @@ async function abrirModalVer(reporteId) {
   modoModal = "ver";
   reporteActualId = reporteId;
 
+  // --- 🔥 AQUÍ EL TRUCO: OCULTAR EL BOTÓN DE ATRÁS 🔥 ---
+  // Asegúrate que tu botón tenga el ID 'prevBtn' (o cámbialo por el que uses)
+  $("#prevBtn").hide();
+  // -------------------------------------------------------
+
   // Cambiar el título del modal
   $("#adminModalLabel").text("Cargando datos...");
 
   // Mostrar el modal
   $("#adminReporteModal").modal("show");
-
-  // Mostrar indicador de carga
-  $("#adminModalLabel").text(`Cargando reporte #${reporteId}...`);
 
   // Cargar los datos completos del reporte
   const datosCompletos = await cargarReporteCompleto(reporteId);
@@ -1396,6 +1398,16 @@ function bloquearCamposVer() {
 // ----------------------------------------------------------------------------
 
 function limpiarModal() {
+  // ... tu código de limpieza ...
+
+  // Reseteamos el formulario
+  $("#formReporte")[0].reset();
+
+  // --- 🔥 RESUCITAR EL BOTÓN 🔥 ---
+  $("#prevBtn").show(); // ¡Importante! Para que aparezca en el próximo registro nuevo
+  // -------------------------------
+
+  reporteActualId = null;
   // Resetear el formulario (limpia todos los inputs)
   const formulario = document.getElementById("editReportForm");
   if (formulario) {
