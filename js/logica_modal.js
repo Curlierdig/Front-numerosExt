@@ -1044,9 +1044,14 @@ async function registrarUsuario() {
 
       // Buscamos el primer candidato que sea un NÚMERO válido
       for (const val of candidatos) {
-        if (val && !isNaN(parseInt(val))) {
-          idFinal = parseInt(val);
-          break; // ¡Ya lo tenemos!
+        // Validamos: que exista, que no sea la frase prohibida, y que no sea un objeto vacío
+        if (val && val !== "Registro exitoso" && typeof val !== "object" && String(val).trim() !== "") {
+          // Opcional: Si tus IDs siempre son cortos, puedes validar longitud,
+          // pero si son UUIDs largos, mejor solo checa que no sea el mensaje.
+          if (String(val).includes("exitosamente")) continue;
+
+          idFinal = val; // Guardamos el valor tal cual (sea numero o string)
+          break;
         }
       }
 
@@ -1582,63 +1587,58 @@ async function guardarReporte() {
 function construirObjetoReporte(esCrear = true) {
   console.log(`🔨 Construyendo objeto de datos del reporte (${esCrear ? "CREAR" : "MODIFICAR"})`);
 
-  // --- 1. OBTENCIÓN ROBUSTA DEL ID ---
-  let rawId = sessionStorage.getItem("currentUserId");
-  let idFinal = parseInt(rawId);
+  // --- 1. OBTENCIÓN DEL ID (COMO TEXTO) ---
+  let idFinal = sessionStorage.getItem("currentUserId");
 
-  // Si sessionStorage falló, intenta con la variable global
-  if (isNaN(idFinal) || !idFinal) {
-    if (typeof usuarioActualId !== "undefined" && usuarioActualId) {
-      idFinal = parseInt(usuarioActualId);
-    }
+  // Si sessionStorage está vacío o dice "undefined", intentamos variable global
+  if (!idFinal || idFinal === "undefined" || idFinal === "null") {
+    idFinal = usuarioActualId;
   }
 
-  // --- SI SIGUE SIENDO NaN, DETENEMOS TODO ---
-  if (esCrear && (isNaN(idFinal) || !idFinal)) {
-    console.error("❌ ERROR FATAL: idUsuario es NaN. Revisa el login/registro.");
-    alert("Error de sesión: No se encuentra el ID del usuario. Por favor, inicia sesión nuevamente.");
-    return null; // Regresamos null para que el código sepa que NO debe enviar nada
+  // VALIDACIÓN BLINDADA:
+  // 1. Que exista.
+  // 2. Que NO sea la frase "Registro exitoso".
+  if (esCrear && (!idFinal || idFinal === "Registro exitoso")) {
+    console.error("❌ ERROR FATAL: ID inválido o no encontrado:", idFinal);
+    alert("Error de sesión: ID de usuario inválido. Recarga la página.");
+    return null;
   }
 
-  // --- 2. CONSTRUCCIÓN DEL OBJETO (TODO MINÚSCULAS) ---
-  // El backend pide: idusuario, numeroreportado, categoriareporte, mediocontacto
+  // --- 2. CONSTRUCCIÓN DEL OBJETO (CAMELCASE Y STRING ID) ---
   const datos = {
-    idusuario: idFinal, // ✅ Minúscula
-    numeroreportado: $("#editNumeroReportado").val().trim() || null, // ✅ Minúscula
-    categoriareporte: $("#editCategoria").val() || null, // ✅ Minúscula
-    mediocontacto: $("#editMedioContacto").val() || null, // ✅ Minúscula
+    idUsuario: idFinal, // ✅ Se envía tal cual (ej: "8653a-bcde")
+    numeroReportado: $("#editNumeroReportado").val().trim() || null,
+    categoriaReporte: $("#editCategoria").val() || null,
+    medioContacto: $("#editMedioContacto").val() || null,
 
-    // El resto también en minúsculas para evitar problemas
-    fechareporte: $("#editFechaReporte").val() || (esCrear ? new Date().toISOString().split("T")[0] : null),
+    // ... el resto de tus campos iguales ...
+    fechaReporte: $("#editFechaReporte").val() || (esCrear ? new Date().toISOString().split("T")[0] : null),
     descripcion: $("#editDescripcion").val().trim() || null,
-    supuestonombre: $("#editSupuestoNombre").val().trim() || null,
+    supuestoNombre: $("#editSupuestoNombre").val().trim() || null,
     genero: $("#editSupuestoGenero").val() || "No especificado",
-    supuestotrabajo: $("#editSupuestoTrabajo").val().trim() || null,
+    supuestoTrabajo: $("#editSupuestoTrabajo").val().trim() || null,
     estatus: $("#editEstatus").val() || "Pendiente",
-
-    // Campos condicionales en minúsculas
-    tipodestino: $("#editTipoDestino").val() || null,
-    numerotarjeta: $("#editNumeroTarjeta").val().trim() || null,
+    tipoDestino: $("#editTipoDestino").val() || null,
+    numeroTarjeta: $("#editNumeroTarjeta").val().trim() || null,
     direccion: $("#editDireccion").val().trim() || null,
   };
 
-  // --- 3. LIMPIEZA DE CAMPOS ---
-  if (datos.tipodestino === "Ninguno" || !datos.tipodestino) {
-    datos.tipodestino = null;
-    datos.numerotarjeta = null;
+  // ... limpieza de campos ...
+  if (datos.tipoDestino === "Ninguno" || !datos.tipoDestino) {
+    datos.tipoDestino = null;
+    datos.numeroTarjeta = null;
     datos.direccion = null;
-  } else if (datos.tipodestino === "tarjeta") {
+  } else if (datos.tipoDestino === "tarjeta") {
     datos.direccion = null;
-  } else if (datos.tipodestino === "ubicacion") {
-    datos.numerotarjeta = null;
+  } else if (datos.tipoDestino === "ubicacion") {
+    datos.numeroTarjeta = null;
   }
 
-  // Borramos idusuario si es una edición (normalmente no se manda al editar, pero depende de tu back)
   if (!esCrear) {
-    delete datos.idusuario;
+    delete datos.idUsuario;
   }
 
-  console.log("📤 Datos listos y corregidos (Minúsculas):", datos);
+  console.log("📤 Datos listos (ID Alfanumérico):", datos);
   return datos;
 }
 // ----------------------------------------------------------------------------
