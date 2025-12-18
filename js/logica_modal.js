@@ -1482,6 +1482,7 @@ async function guardarReporte() {
     // Solo eliminar campos del usuario que no deberían modificarse
     delete datosReporte.idUsuario;
     delete datosReporte.idusuario;
+    delete datosReporte.categoriaReporte;
     delete datosReporte.nombreusuario;
     delete datosReporte.edad;
     delete datosReporte.sexo;
