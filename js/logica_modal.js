@@ -1495,55 +1495,82 @@ async function guardarReporte() {
 function construirObjetoReporte(esCrear = true) {
   console.log(`🔨 Construyendo objeto de datos del reporte (${esCrear ? "CREAR" : "MODIFICAR"})`);
 
-  // Extraer el ID del sessionStorage para asegurar que sea el más reciente
-  const idSession = sessionStorage.getItem("currentUserId");
+  // --- 1. RESCATE DE ID NIVEL EXPERTO ---
+  let rawId = sessionStorage.getItem("currentUserId");
 
-  // Limpiamos el ID por si acaso viene como string de mensaje (el error de hace rato)
-  let idUsuarioLimpio = idSession;
-  if (idSession === "Registro exitoso" || !idSession) {
-    idUsuarioLimpio = usuarioActualId; // Intentar usar la variable global si la session falló
+  // Si no está en session, buscamos en la variable global
+  if (!rawId || rawId === "undefined" || rawId === "null") {
+    rawId = usuarioActualId;
   }
 
-  // Construir objeto con los nombres EXACTOS que pide tu API (CamelCase)
-  const datos = {
-    // Campos obligatorios según tu error 422
-    idUsuario: idUsuarioLimpio ? parseInt(idUsuarioLimpio) : null, // Debe ser idUsuario (CamelCase) y número
-    numeroReportado: $("#editNumeroReportado").val().trim() || null, // CamelCase
-    categoriaReporte: $("#editCategoria").val() || null, // CamelCase
-    medioContacto: $("#editMedioContacto").val() || null, // CamelCase
+  // Convertimos a entero seguro
+  let idFinal = parseInt(rawId);
 
-    // Otros campos
-    fechaReporte: $("#editFechaReporte").val() || (esCrear ? new Date().toISOString().split("T")[0] : null),
+  // Si después de todo sigue siendo NaN (o es 0), hay bronca
+  if (isNaN(idFinal) || idFinal === 0) {
+    console.error("❌ ERROR CRÍTICO: No hay un ID de usuario válido para enviar. Raw:", rawId);
+    // Intentamos recuperar el ID del objeto de usuario recién registrado si existe
+    const backupUser = sessionStorage.getItem("usuarioRecienRegistrado");
+    if (backupUser) {
+      try {
+        const u = JSON.parse(backupUser);
+        idFinal = parseInt(u.id);
+        console.log("✅ ID recuperado del backup de emergencia:", idFinal);
+      } catch (e) {
+        console.error("Fallo recuperacion backup");
+      }
+    }
+  }
+
+  // --- 2. CONSTRUCCIÓN DEL OBJETO (TODO MINÚSCULAS) ---
+  const datos = {
+    // Nombres EXACTOS según tu error: ['idusuario', 'numeroreportado', 'categoriareporte', 'mediocontacto']
+    idusuario: idFinal,
+    numeroreportado: $("#editNumeroReportado").val().trim() || null,
+    categoriareporte: $("#editCategoria").val() || null,
+    mediocontacto: $("#editMedioContacto").val() || null,
+
+    // El resto también en minúsculas por si acaso
+    fechareporte: $("#editFechaReporte").val() || (esCrear ? new Date().toISOString().split("T")[0] : null),
     descripcion: $("#editDescripcion").val().trim() || null,
-    supuestoNombre: $("#editSupuestoNombre").val().trim() || null,
+    supuestonombre: $("#editSupuestoNombre").val().trim() || null,
     genero: $("#editSupuestoGenero").val() || "No especificado",
-    supuestoTrabajo: $("#editSupuestoTrabajo").val().trim() || null,
+    supuestotrabajo: $("#editSupuestoTrabajo").val().trim() || null,
     estatus: $("#editEstatus").val() || "Pendiente",
-    tipoDestino: $("#editTipoDestino").val() || null,
-    numeroTarjeta: $("#editNumeroTarjeta").val().trim() || null,
+
+    // Estos campos especiales
+    tipodestino: $("#editTipoDestino").val() || null,
+    numerotarjeta: $("#editNumeroTarjeta").val().trim() || null,
     direccion: $("#editDireccion").val().trim() || null,
   };
 
-  // Lógica de limpieza según el tipo de destino
-  if (datos.tipoDestino === "Ninguno" || !datos.tipoDestino) {
-    datos.tipoDestino = null;
-    datos.numeroTarjeta = null;
+  // --- 3. LIMPIEZA LÓGICA ---
+
+  // Si tipodestino es "Ninguno", limpiamos dependientes
+  if (datos.tipodestino === "Ninguno" || !datos.tipodestino) {
+    datos.tipodestino = null;
+    datos.numerotarjeta = null;
     datos.direccion = null;
-  } else if (datos.tipoDestino === "tarjeta") {
-    datos.direccion = null;
-  } else if (datos.tipoDestino === "ubicacion") {
-    datos.numeroTarjeta = null;
+  } else if (datos.tipodestino === "tarjeta") {
+    datos.direccion = null; // Si es tarjeta, borramos dirección
+  } else if (datos.tipodestino === "ubicacion") {
+    datos.numerotarjeta = null; // Si es ubicación, borramos tarjeta
   }
 
-  // Agregamos datos del usuario si es creación (usando los nombres que tu back espere)
-  if (esCrear && datosUsuarioActual) {
-    datos.nombreUsuario = datosUsuarioActual.nombreusuario || null;
-    datos.edad = datosUsuarioActual.edad || null;
-    datos.sexo = datosUsuarioActual.sexo || null;
-    datos.municipio = datosUsuarioActual.municipio || null;
+  // Si estamos en modo edición, tal vez no necesites mandar el idusuario,
+  // pero para CREAR es obligatorio.
+  if (!esCrear) {
+    delete datos.idusuario;
   }
 
-  console.log("📤 Datos corregidos para enviar:", datos);
+  console.log("📤 Datos corregidos (Minúsculas y sin NaN):", datos);
+
+  // Última validación antes de enviar para que no truenes el server
+  if (esCrear && (isNaN(datos.idusuario) || !datos.idusuario)) {
+    alert("⚠️ Error interno: No se ha detectado el ID del usuario. Por favor recarga la página o vuelve a registrarte.");
+    return null; // Retornar null para que el código que llama a esto sepa que abortar
+  }
+
   return datos;
 }
 // ----------------------------------------------------------------------------
