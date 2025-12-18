@@ -1401,21 +1401,20 @@ function bloquearCamposVer() {
 // ----------------------------------------------------------------------------
 
 function limpiarModal() {
-  // ... tu código de limpieza ...
-
-  // Reseteamos el formulario
-  $("#editReporForm")[0].reset();
-
-  // --- RESUCITAR EL BOTÓN  ---
-  $("#prevBtn").show();
   // -------------------------------
 
   reporteActualId = null;
-  // Resetear el formulario (limpia todos los inputs)
-  const formulario = document.getElementById("editReportForm");
-  if (formulario) {
-    formulario.reset();
+  const $formulario = $("#editReportForm");
+
+  // Validamos si existe antes de resetear para que no truene
+  if ($formulario.length > 0) {
+    $formulario[0].reset();
+  } else {
+    console.warn("⚠️ No se encontró el formulario #editReportForm para limpiar.");
   }
+
+  // 3. Resucitar el botón de Atrás
+  $("#prevBtn").show();
 
   // Limpiar variables de control
   reporteActualId = null;
