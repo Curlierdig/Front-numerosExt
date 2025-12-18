@@ -1236,16 +1236,14 @@ async function abrirModalVer(reporteId) {
   modoModal = "ver";
   reporteActualId = reporteId;
 
-  // --- 🔥 AQUÍ EL TRUCO: OCULTAR EL BOTÓN DE ATRÁS 🔥 ---
-  // Asegúrate que tu botón tenga el ID 'prevBtn' (o cámbialo por el que uses)
-  $("#prevBtn").hide();
-  // -------------------------------------------------------
-
   // Cambiar el título del modal
   $("#adminModalLabel").text("Cargando datos...");
 
   // Mostrar el modal
   $("#adminReporteModal").modal("show");
+
+  // Mostrar indicador de carga
+  $("#adminModalLabel").text(`Cargando reporte #${reporteId}...`);
 
   // Cargar los datos completos del reporte
   const datosCompletos = await cargarReporteCompleto(reporteId);
@@ -1260,7 +1258,12 @@ async function abrirModalVer(reporteId) {
 
     // Ir directamente al paso 3 (detalles del reporte)
     pasoActual = 3;
+
+    // El wizard actualiza la vista (y normalmente muestra los botones)
     actualizarVistaWizard();
+
+    $("#prevBtn").hide();
+    // (Asegúrate que tu botón en el HTML tenga id="prevBtn")
 
     // Bloquear algunos campos en modo ver
     bloquearCamposVer();
@@ -1403,8 +1406,8 @@ function limpiarModal() {
   // Reseteamos el formulario
   $("#formReporte")[0].reset();
 
-  // --- 🔥 RESUCITAR EL BOTÓN 🔥 ---
-  $("#prevBtn").show(); // ¡Importante! Para que aparezca en el próximo registro nuevo
+  // --- RESUCITAR EL BOTÓN  ---
+  $("#prevBtn").show();
   // -------------------------------
 
   reporteActualId = null;
