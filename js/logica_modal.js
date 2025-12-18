@@ -985,61 +985,148 @@ async function validarUsuario(telefono, correo) {
   }
 }
 // ----------------------------------------------------------------------------
-// 9. FUNCIÓN PARA REGISTRAR NUEVO USUARIO (ACTUALIZADA)
+// 9. FUNCIÓN PARA REGISTRAR NUEVO USUARIO (BLINDADA CONTRA NaN)
 // ----------------------------------------------------------------------------
 
 async function registrarUsuario() {
   $("#nextBtn").prop("disabled", true).text("Registrando...");
 
   try {
-    const telefono = $("#phoneLogin").val().trim();
-    const correo = $("#emailLogin").val().trim();
+    // 1. Recolección de datos
+    const nombre = $("#editNombreUsuario").val().trim();
+    const edad = parseInt($("#editEdad").val()) || 0;
+    const sexo = $("#editSexo").val();
+    const telefono = $("#phoneLogin").val().trim(); // Usar teléfono del paso 1
+    const correo = $("#emailLogin").val().trim(); // Usar correo del paso 1
+    let municipio = $("#editMunicipio").val();
+
+    if (municipio === "otro") {
+      municipio = $("#otroMunicipioInput").val().trim() || "No especificado";
+    }
 
     const datosUsuario = {
       correo: correo,
       numeroTelefono: telefono,
-      nombre: $("#editNombreUsuario").val().trim(),
-      edad: parseInt($("#editEdad").val()) || 0,
-      sexo: $("#editSexo").val(),
-      municipio: $("#editMunicipio").val() === "otro" ? $("#otroMunicipioInput").val().trim() : $("#editMunicipio").val(),
+      nombre: nombre,
+      edad: edad,
+      sexo: sexo,
+      municipio: municipio,
       entidadForanea: "Chihuahua",
-      contrasena: telefono,
+      contrasena: telefono, // Se usa el teléfono como contraseña inicial
     };
 
+    console.log("📤 Datos usuario a registrar:", datosUsuario);
+
+    // 2. Petición al servidor
     const response = await fetch(`/api/auth/registrar`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(datosUsuario),
     });
 
-    const result = await response.json();
+    // Intentamos parsear la respuesta, si falla devolvemos objeto vacío
+    let result = {};
+    try {
+      result = await response.json();
+    } catch (e) {
+      console.warn("La respuesta no fue un JSON válido");
+    }
 
     if (response.ok) {
-      // BUSCAMOS EL ID REAL, NO EL MENSAJE
-      let idFinal = result.idusuario || result.id || (result.data && result.data.id);
+      console.log("📥 Respuesta del servidor:", result);
 
-      // Si el back regresa { mensaje: "Registro exitoso", id: 10 },
-      // asegúrate de NO agarrar el mensaje.
-      if (!idFinal && result.mensaje && result.mensaje.includes("exitosamente")) {
-        console.log("⚠️ El mensaje no traía ID, aplicamos plan B de búsqueda...");
-        const aux = await obtenerUsuarioPorCredenciales(correo, telefono);
-        idFinal = aux?.idusuario;
+      // --- LÓGICA DE EXTRACCIÓN DE ID (CORREGIDA) ---
+      let idFinal = null;
+
+      // Lista de posibles ubicaciones del ID en la respuesta
+      // Convertimos a int para validar si es número real
+      const candidatos = [result.idusuario, result.id, result.data?.idusuario, result.data?.id, Array.isArray(result) ? result[0]?.idusuario : null];
+
+      // Buscamos el primer candidato que sea un NÚMERO válido
+      for (const val of candidatos) {
+        if (val && !isNaN(parseInt(val))) {
+          idFinal = parseInt(val);
+          break; // ¡Ya lo tenemos!
+        }
       }
 
-      if (idFinal) {
+      // CASO DE EMERGENCIA: Si no encontramos ID numérico (porque devolvió solo texto)
+      if (!idFinal) {
+        console.warn("⚠️ El registro fue exitoso pero no recibimos ID numérico. Buscando manualmente...");
+
+        // Llamamos a la función auxiliar para buscar el ID usando las credenciales
+        const usuarioRecuperado = await obtenerUsuarioPorCredenciales(correo, telefono);
+
+        if (usuarioRecuperado && usuarioRecuperado.idusuario) {
+          idFinal = parseInt(usuarioRecuperado.idusuario);
+          console.log("✅ ID recuperado tras búsqueda manual:", idFinal);
+        }
+      }
+
+      // --- VALIDACIÓN FINAL Y GUARDADO ---
+      if (idFinal && !isNaN(idFinal)) {
+        // 1. Guardar ID en variable global y Storage
         usuarioActualId = idFinal;
         sessionStorage.setItem("currentUserId", idFinal);
-        console.log("✅ ID REAL guardado:", idFinal); // Aquí ya no debe decir "Registro exitoso"
+
+        // 2. Guardar respaldo del usuario
+        const respaldoUsuario = {
+          id: idFinal,
+          nombre: nombre,
+          correo: correo,
+          telefono: telefono,
+          edad: edad,
+          sexo: sexo,
+          municipio: municipio,
+        };
+        sessionStorage.setItem("usuarioRecienRegistrado", JSON.stringify(respaldoUsuario));
+
+        // 3. Actualizar variable global de datos
+        datosUsuarioActual = {
+          nombreusuario: nombre,
+          edad: edad,
+          sexo: sexo,
+          numerotelefono: telefono,
+          correousuario: correo,
+          municipio: municipio,
+          vecesreportado: 0,
+        };
+
+        console.log("✅ ID REAL GUARDADO EN SESSION:", idFinal);
+
+        // 4. Preparar UI para el siguiente paso
+        $("#editVecesReportado").val("0");
+        $("#editNumeroUsuario").val(telefono);
+        $("#editCorreo").val(correo);
+
+        bloquearCamposUsuario();
+        $("#nextBtn").prop("disabled", false).text("Siguiente");
+
         return true;
+      } else {
+        // Si llegamos aquí, se registró en la BD pero el Front no tiene el ID.
+        console.error("❌ ERROR CRÍTICO: Usuario registrado pero ID no encontrado.");
+        alert("El registro fue exitoso, pero hubo un problema al iniciar sesión automáticamente. Por favor recarga e intenta validar tu número.");
+        $("#nextBtn").prop("disabled", false).text("Siguiente");
+        return false;
       }
     } else {
-      alert("Error al registrar: " + (result.mensaje || "Datos inválidos"));
+      // Manejo de errores del servidor (400, 500, etc.)
+      let mensajeError = "Error al registrar.";
+
+      if (result.detail) {
+        mensajeError += " " + (Array.isArray(result.detail) ? result.detail.map((d) => d.msg).join(", ") : result.detail);
+      } else if (result.mensaje || result.message) {
+        mensajeError += " " + (result.mensaje || result.message);
+      }
+
+      alert(mensajeError);
       $("#nextBtn").prop("disabled", false).text("Siguiente");
       return false;
     }
   } catch (error) {
-    console.error("❌ Error fatal:", error);
-    alert("Error: " + error.message);
+    console.error("❌ Error fatal en registro:", error);
+    alert("Ocurrió un error inesperado: " + error.message);
     $("#nextBtn").prop("disabled", false).text("Siguiente");
     return false;
   }
