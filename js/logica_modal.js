@@ -997,7 +997,7 @@ async function registrarUsuario() {
   $("#nextBtn").prop("disabled", true).text("Registrando...");
 
   try {
-    const adminSession = sessionStorage.getItem("usuario"); // Recuperamos lo que guardó obtenerPerfilAdmin
+    const adminSession = JSON.parse(sessionStorage.getItem("usuario"));
     console.log(adminSession);
     id = adminSession.id;
     console.log(id);
