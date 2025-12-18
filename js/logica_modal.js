@@ -1460,16 +1460,16 @@ async function guardarReporte() {
   console.log("📦 Datos reporte ANTES de limpieza:", datosReporte);
 
   // Validación adicional de campos requeridos SOLO para creación
-  if (esCrear) {
-    const camposRequeridosCreacion = ["idusuario", "numeroreportado", "categoriareporte", "mediocontacto"];
-    const camposFaltantes = camposRequeridosCreacion.filter((campo) => !datosReporte[campo]);
+  // if (esCrear) {
+  //   const camposRequeridosCreacion = ["idusuario", "numeroreportado", "categoriareporte", "mediocontacto"];
+  //   const camposFaltantes = camposRequeridosCreacion.filter((campo) => !datosReporte[campo]);
 
-    if (camposFaltantes.length > 0) {
-      alert(`Faltan campos requeridos para crear reporte:\n${camposFaltantes.join(", ")}`);
-      console.error("Campos faltantes para creación:", camposFaltantes);
-      return;
-    }
-  }
+  //   if (camposFaltantes.length > 0) {
+  //     alert(`Faltan campos requeridos para crear reporte:\n${camposFaltantes.join(", ")}`);
+  //     console.error("Campos faltantes para creación:", camposFaltantes);
+  //     return;
+  //   }
+  // }
 
   let url = `/api/incidencias/crear`;
   let metodo = "POST";
