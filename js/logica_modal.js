@@ -877,8 +877,7 @@ function validarDatosUsuario() {
 function validarDatosReporte() {
   // Obtener los valores de los campos
   const numeroReportado = $("#editNumeroReportado").val().trim();
-  const fechaReporte = $("#editFechaReporte").val().trim();
-  const categoria = $("#editCategoria").val();
+  const categoriaReporte = $("#editCategoria").val();
   const medioContacto = $("#editMedioContacto").val();
 
   // Validar que los campos obligatorios estén llenos
@@ -894,13 +893,7 @@ function validarDatosReporte() {
     return false;
   }
 
-  if (!fechaReporte) {
-    alert("Por favor selecciona la fecha del reporte.");
-    $("#editFechaReporte").focus();
-    return false;
-  }
-
-  if (!categoria) {
+  if (!categoriaReporte) {
     alert("Por favor selecciona la categoría del reporte.");
     $("#editCategoria").focus();
     return false;
@@ -1019,15 +1012,16 @@ async function registrarUsuario() {
       body: JSON.stringify(datosUsuario),
     });
 
-    const result = await response.json().catch(() => ({}));
+    const result = await response.json();
 
     if (response.ok) {
-      // Intentar sacar el ID de la respuesta del registro
-      let idFinal = result.idusuario || result.id || result.data?.id || (Array.isArray(result) && result[0]?.idusuario);
+      // BUSCAMOS EL ID REAL, NO EL MENSAJE
+      let idFinal = result.idusuario || result.id || (result.data && result.data.id);
 
-      // Si el back no mandó ID, lo vamos a buscar a la de fuerza con un login rápido
-      if (!idFinal) {
-        console.log("⚠️ Registro exitoso pero sin ID en respuesta. Buscando ID...");
+      // Si el back regresa { mensaje: "Registro exitoso", id: 10 },
+      // asegúrate de NO agarrar el mensaje.
+      if (!idFinal && result.mensaje && result.mensaje.includes("exitosamente")) {
+        console.log("⚠️ El mensaje no traía ID, aplicamos plan B de búsqueda...");
         const aux = await obtenerUsuarioPorCredenciales(correo, telefono);
         idFinal = aux?.idusuario;
       }
@@ -1035,13 +1029,8 @@ async function registrarUsuario() {
       if (idFinal) {
         usuarioActualId = idFinal;
         sessionStorage.setItem("currentUserId", idFinal);
-        console.log("✅ ID guardado en session:", idFinal);
-
-        bloquearCamposUsuario();
-        $("#nextBtn").prop("disabled", false).text("Siguiente");
+        console.log("✅ ID REAL guardado:", idFinal); // Aquí ya no debe decir "Registro exitoso"
         return true;
-      } else {
-        throw new Error("No se pudo recuperar el ID del usuario creado.");
       }
     } else {
       alert("Error al registrar: " + (result.mensaje || "Datos inválidos"));
@@ -1506,106 +1495,55 @@ async function guardarReporte() {
 function construirObjetoReporte(esCrear = true) {
   console.log(`🔨 Construyendo objeto de datos del reporte (${esCrear ? "CREAR" : "MODIFICAR"})`);
 
-  // Obtener valores del formulario
-  const numeroReportado = $("#editNumeroReportado").val().trim();
-  const fechaReporte = $("#editFechaReporte").val();
-  const categoria = $("#editCategoria").val();
-  const medioContacto = $("#editMedioContacto").val();
-  const descripcion = $("#editDescripcion").val().trim();
-  const supuestoNombre = $("#editSupuestoNombre").val().trim();
-  const genero = $("#editSupuestoGenero").val();
-  const supuestoTrabajo = $("#editSupuestoTrabajo").val().trim();
-  const estatus = $("#editEstatus").val();
-  const tipoDestino = $("#editTipoDestino").val();
-  const numeroTarjeta = $("#editNumeroTarjeta").val().trim();
-  const direccion = $("#editDireccion").val().trim();
+  // Extraer el ID del sessionStorage para asegurar que sea el más reciente
+  const idSession = sessionStorage.getItem("currentUserId");
 
-  // Depuración: ver qué valor tiene tipoDestino
-  console.log("🔍 Valor de editTipoDestino:", tipoDestino);
-  console.log("🔍 Valor de editNumeroTarjeta:", numeroTarjeta);
-  console.log("🔍 Valor de editDireccion:", direccion);
-
-  // Extraer idusuario correctamente SOLO para creación
-  let idUsuarioValue = null;
-  if (esCrear && usuarioActualId) {
-    // Si usuarioActualId es un número de teléfono (10 dígitos)
-    if (typeof usuarioActualId === "string" && /^\d{10}$/.test(usuarioActualId)) {
-      console.log("⚠️ Usando teléfono como referencia para usuario:", usuarioActualId);
-      // En este caso, el backend debería buscar el usuario por teléfono
-      idUsuarioValue = usuarioActualId;
-    }
-    // Si es un ID normal
-    else if (typeof usuarioActualId === "string" || typeof usuarioActualId === "number") {
-      idUsuarioValue = usuarioActualId;
-    }
+  // Limpiamos el ID por si acaso viene como string de mensaje (el error de hace rato)
+  let idUsuarioLimpio = idSession;
+  if (idSession === "Registro exitoso" || !idSession) {
+    idUsuarioLimpio = usuarioActualId; // Intentar usar la variable global si la session falló
   }
-  // Construir objeto base
+
+  // Construir objeto con los nombres EXACTOS que pide tu API (CamelCase)
   const datos = {
-    // Campos del reporte (siempre se envían)
-    numeroreportado: numeroReportado || null,
-    categoriareporte: categoria || null,
-    mediocontacto: medioContacto || null,
-    fechareporte: fechaReporte || (esCrear ? new Date().toISOString().split("T")[0] : undefined),
-    descripcion: descripcion || null,
-    supuestonombre: supuestoNombre || null,
-    genero: genero || "No especificado",
-    supuestotrabajo: supuestoTrabajo || null,
-    estatus: estatus || "Pendiente",
+    // Campos obligatorios según tu error 422
+    idUsuario: idUsuarioLimpio ? parseInt(idUsuarioLimpio) : null, // Debe ser idUsuario (CamelCase) y número
+    numeroReportado: $("#editNumeroReportado").val().trim() || null, // CamelCase
+    categoriaReporte: $("#editCategoria").val() || null, // CamelCase
+    medioContacto: $("#editMedioContacto").val() || null, // CamelCase
 
-    // IMPORTANTE: Siempre enviar tipodestino, incluso si es "Ninguno"
-    tipodestino: tipoDestino,
-
-    // Enviar estos campos solo si tienen valor
-    numerotarjeta: numeroTarjeta || null,
-    direccion: direccion || null,
+    // Otros campos
+    fechaReporte: $("#editFechaReporte").val() || (esCrear ? new Date().toISOString().split("T")[0] : null),
+    descripcion: $("#editDescripcion").val().trim() || null,
+    supuestoNombre: $("#editSupuestoNombre").val().trim() || null,
+    genero: $("#editSupuestoGenero").val() || "No especificado",
+    supuestoTrabajo: $("#editSupuestoTrabajo").val().trim() || null,
+    estatus: $("#editEstatus").val() || "Pendiente",
+    tipoDestino: $("#editTipoDestino").val() || null,
+    numeroTarjeta: $("#editNumeroTarjeta").val().trim() || null,
+    direccion: $("#editDireccion").val().trim() || null,
   };
 
-  // Solo para creación, agregar idusuario
-  if (esCrear && idUsuarioValue) {
-    datos.idusuario = idUsuarioValue;
-
-    // También agregar datos del usuario si existen
-    if (datosUsuarioActual) {
-      datos.nombreusuario = datosUsuarioActual.nombreusuario || null;
-      datos.edad = datosUsuarioActual.edad || null;
-      datos.sexo = datosUsuarioActual.sexo || null;
-      datos.numerotelefono = datosUsuarioActual.numerotelefono || null;
-      datos.correousuario = datosUsuarioActual.correousuario || null;
-      datos.municipio = datosUsuarioActual.municipio || null;
-    }
-  }
-
-  // IMPORTANTE: Manejar el caso especial cuando tipoDestino es "Ninguno"
-  // Si el tipo de destino es "Ninguno", limpiar los campos relacionados
-  if (tipoDestino === "Ninguno" || !tipoDestino) {
-    datos.tipodestino = null;
-    datos.numerotarjeta = null;
+  // Lógica de limpieza según el tipo de destino
+  if (datos.tipoDestino === "Ninguno" || !datos.tipoDestino) {
+    datos.tipoDestino = null;
+    datos.numeroTarjeta = null;
     datos.direccion = null;
-  }
-
-  // Si tipoDestino es "tarjeta", limpiar dirección
-  if (tipoDestino === "tarjeta") {
+  } else if (datos.tipoDestino === "tarjeta") {
     datos.direccion = null;
+  } else if (datos.tipoDestino === "ubicacion") {
+    datos.numeroTarjeta = null;
   }
 
-  // Si tipoDestino es "ubicacion", limpiar número de tarjeta
-  if (tipoDestino === "ubicacion") {
-    datos.numerotarjeta = null;
+  // Agregamos datos del usuario si es creación (usando los nombres que tu back espere)
+  if (esCrear && datosUsuarioActual) {
+    datos.nombreUsuario = datosUsuarioActual.nombreusuario || null;
+    datos.edad = datosUsuarioActual.edad || null;
+    datos.sexo = datosUsuarioActual.sexo || null;
+    datos.municipio = datosUsuarioActual.municipio || null;
   }
 
-  // Limpiar campos undefined (no enviarlos)
-  Object.keys(datos).forEach((key) => {
-    if (datos[key] === undefined) {
-      delete datos[key];
-    }
-
-    // También limpiar campos vacíos (string vacío)
-    if (datos[key] === "") {
-      datos[key] = null;
-    }
-  });
-
-  console.log("📤 Datos finales a enviar:", datos);
+  console.log("📤 Datos corregidos para enviar:", datos);
   return datos;
 }
 // ----------------------------------------------------------------------------
