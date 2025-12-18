@@ -1583,37 +1583,39 @@ function construirObjetoReporte(esCrear = true) {
 
   // --- 2. OBJETO CON CAMPOS EN MINÚSCULAS ---
   const datos = {
-    idusuario: idFinal, // ✅ Se va como String (UUID)
-    numeroreportado: $("#editNumeroReportado").val().trim() || null,
-    categoriareporte: $("#editCategoria").val() || null,
-    mediocontacto: $("#editMedioContacto").val() || null,
+    // ⚠️ CAMBIO CLAVE: Mayúsculas intermedias
+    idUsuario: idFinal, // <--- idUsuario (NO idusuario)
+    numeroReportado: $("#editNumeroReportado").val().trim() || null, // <--- numeroReportado
+    categoriaReporte: $("#editCategoria").val() || null, // <--- categoriaReporte
+    medioContacto: $("#editMedioContacto").val() || null, // <--- medioContacto
 
-    fechareporte: $("#editFechaReporte").val() || (esCrear ? new Date().toISOString().split("T")[0] : null),
+    // El resto igual en CamelCase
+    fechaReporte: $("#editFechaReporte").val() || (esCrear ? new Date().toISOString().split("T")[0] : null),
     descripcion: $("#editDescripcion").val().trim() || null,
-    supuestonombre: $("#editSupuestoNombre").val().trim() || null,
+    supuestoNombre: $("#editSupuestoNombre").val().trim() || null,
     genero: $("#editSupuestoGenero").val() || "No especificado",
-    supuestotrabajo: $("#editSupuestoTrabajo").val().trim() || null,
+    supuestoTrabajo: $("#editSupuestoTrabajo").val().trim() || null,
     estatus: $("#editEstatus").val() || "Pendiente",
 
-    tipodestino: $("#editTipoDestino").val() || null,
-    numerotarjeta: $("#editNumeroTarjeta").val().trim() || null,
+    tipoDestino: $("#editTipoDestino").val() || null,
+    numeroTarjeta: $("#editNumeroTarjeta").val().trim() || null,
     direccion: $("#editDireccion").val().trim() || null,
   };
 
   // --- 3. LIMPIEZA ---
-  if (datos.tipodestino === "Ninguno" || !datos.tipodestino) {
-    datos.tipodestino = null;
-    datos.numerotarjeta = null;
+  if (datos.tipoDestino === "Ninguno" || !datos.tipoDestino) {
+    datos.tipoDestino = null;
+    datos.numeroTarjeta = null;
     datos.direccion = null;
-  } else if (datos.tipodestino === "tarjeta") {
+  } else if (datos.tipoDestino === "tarjeta") {
     datos.direccion = null;
-  } else if (datos.tipodestino === "ubicacion") {
-    datos.numerotarjeta = null;
+  } else if (datos.tipoDestino === "ubicacion") {
+    datos.numeroTarjeta = null;
   }
 
-  if (!esCrear) delete datos.idusuario;
+  if (!esCrear) delete datos.idUsuario;
 
-  console.log("📤 Datos reporte listos:", datos);
+  console.log("📤 Datos reporte listos (CamelCase + UUID):", datos);
   return datos;
 }
 // ----------------------------------------------------------------------------
