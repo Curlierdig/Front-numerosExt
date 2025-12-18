@@ -1484,6 +1484,7 @@ async function guardarReporte() {
     delete datosReporte.idusuario;
     delete datosReporte.categoriaReporte;
     delete datosReporte.nombreusuario;
+    delete datosReporte.direccion;
     delete datosReporte.edad;
     delete datosReporte.sexo;
     delete datosReporte.numerotelefono;
