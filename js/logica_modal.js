@@ -997,7 +997,9 @@ async function registrarUsuario() {
   $("#nextBtn").prop("disabled", true).text("Registrando...");
 
   try {
-    // --- RECOLECCIÓN DE DATOS ---
+    const adminSession = sessionStorage.getItem("usuario"); // Recuperamos lo que guardó obtenerPerfilAdmin
+
+    id = adminSession.id;
     const nombre = $("#editNombreUsuario").val().trim();
     // Validamos edad (si viene vacía ponemos 0)
     const edadVal = $("#editEdad").val();
@@ -1018,6 +1020,7 @@ async function registrarUsuario() {
       municipio: municipio,
       entidadForanea: "Chihuahua",
       contrasena: telefono,
+      idAdmin: id,
     };
 
     console.log("📤 Enviando registro:", datosUsuario);
