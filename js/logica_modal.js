@@ -1587,58 +1587,70 @@ async function guardarReporte() {
 function construirObjetoReporte(esCrear = true) {
   console.log(`🔨 Construyendo objeto de datos del reporte (${esCrear ? "CREAR" : "MODIFICAR"})`);
 
-  // --- 1. OBTENCIÓN DEL ID (COMO TEXTO) ---
-  let idFinal = sessionStorage.getItem("currentUserId");
+  // --- 1. OBTENCIÓN DEL ID (BLINDADA) ---
+  let rawId = sessionStorage.getItem("currentUserId");
 
-  // Si sessionStorage está vacío o dice "undefined", intentamos variable global
-  if (!idFinal || idFinal === "undefined" || idFinal === "null") {
-    idFinal = usuarioActualId;
+  // Si no está en session, buscamos en variable global
+  if (!rawId || rawId === "undefined" || rawId === "null") {
+    if (typeof usuarioActualId !== "undefined") {
+      rawId = usuarioActualId;
+    }
   }
 
-  // VALIDACIÓN BLINDADA:
-  // 1. Que exista.
-  // 2. Que NO sea la frase "Registro exitoso".
-  if (esCrear && (!idFinal || idFinal === "Registro exitoso")) {
-    console.error("❌ ERROR FATAL: ID inválido o no encontrado:", idFinal);
-    alert("Error de sesión: ID de usuario inválido. Recarga la página.");
-    return null;
+  // Convertimos a entero (si tu ID es numérico)
+  let idFinal = parseInt(rawId);
+
+  // IMPORTANTE: Si tu ID tiene letras, quita el parseInt y usa: idFinal = rawId;
+
+  // Validamos que tengamos un ID real
+  if (esCrear) {
+    // Si idFinal es NaN, o 0, o nulo...
+    if (!idFinal || (typeof idFinal === "number" && isNaN(idFinal))) {
+      console.error("❌ ERROR FATAL: No hay ID válido para el reporte. Valor:", rawId);
+      alert("Error: No se detectó el usuario. Por favor recarga la página.");
+      return null; // ¡ABORTAR MISIÓN!
+    }
   }
 
-  // --- 2. CONSTRUCCIÓN DEL OBJETO (CAMELCASE Y STRING ID) ---
+  // --- 2. CONSTRUCCIÓN DEL OBJETO (TODO MINÚSCULAS) ---
+  // Según tu último error, el servidor exige: idusuario, numeroreportado, categoriareporte, mediocontacto
   const datos = {
-    idUsuario: idFinal, // ✅ Se envía tal cual (ej: "8653a-bcde")
-    numeroReportado: $("#editNumeroReportado").val().trim() || null,
-    categoriaReporte: $("#editCategoria").val() || null,
-    medioContacto: $("#editMedioContacto").val() || null,
+    // ⚠️ TODO EN MINÚSCULAS AQUÍ ⚠️
+    idusuario: idFinal,
+    numeroreportado: $("#editNumeroReportado").val().trim() || null,
+    categoriareporte: $("#editCategoria").val() || null,
+    mediocontacto: $("#editMedioContacto").val() || null,
 
-    // ... el resto de tus campos iguales ...
-    fechaReporte: $("#editFechaReporte").val() || (esCrear ? new Date().toISOString().split("T")[0] : null),
+    // El resto también en minúsculas para no errarle
+    fechareporte: $("#editFechaReporte").val() || (esCrear ? new Date().toISOString().split("T")[0] : null),
     descripcion: $("#editDescripcion").val().trim() || null,
-    supuestoNombre: $("#editSupuestoNombre").val().trim() || null,
+    supuestonombre: $("#editSupuestoNombre").val().trim() || null,
     genero: $("#editSupuestoGenero").val() || "No especificado",
-    supuestoTrabajo: $("#editSupuestoTrabajo").val().trim() || null,
+    supuestotrabajo: $("#editSupuestoTrabajo").val().trim() || null,
     estatus: $("#editEstatus").val() || "Pendiente",
-    tipoDestino: $("#editTipoDestino").val() || null,
-    numeroTarjeta: $("#editNumeroTarjeta").val().trim() || null,
+
+    tipodestino: $("#editTipoDestino").val() || null,
+    numerotarjeta: $("#editNumeroTarjeta").val().trim() || null,
     direccion: $("#editDireccion").val().trim() || null,
   };
 
-  // ... limpieza de campos ...
-  if (datos.tipoDestino === "Ninguno" || !datos.tipoDestino) {
-    datos.tipoDestino = null;
-    datos.numeroTarjeta = null;
+  // --- 3. LIMPIEZA ---
+  if (datos.tipodestino === "Ninguno" || !datos.tipodestino) {
+    datos.tipodestino = null;
+    datos.numerotarjeta = null;
     datos.direccion = null;
-  } else if (datos.tipoDestino === "tarjeta") {
+  } else if (datos.tipodestino === "tarjeta") {
     datos.direccion = null;
-  } else if (datos.tipoDestino === "ubicacion") {
-    datos.numeroTarjeta = null;
+  } else if (datos.tipodestino === "ubicacion") {
+    datos.numerotarjeta = null;
   }
 
+  // Si es edición, quitamos el ID
   if (!esCrear) {
-    delete datos.idUsuario;
+    delete datos.idusuario;
   }
 
-  console.log("📤 Datos listos (ID Alfanumérico):", datos);
+  console.log("📤 Datos listos (Minúsculas forzadas):", datos);
   return datos;
 }
 // ----------------------------------------------------------------------------
