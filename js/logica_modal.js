@@ -1,49 +1,37 @@
 (function verificarSesionInmediata() {
-  // Solo ejecutar si estamos en panel.html
   if (window.location.pathname.includes("/panel.html") || window.location.pathname.endsWith("panel.html") || document.title.toLowerCase().includes("panel")) {
-    // VERIFICACIÓN MEJORADA: Buscar múltiples posibles almacenamientos de sesión
     let tieneSesion = false;
-
-    // 1. Verificar si hay usuario en sessionStorage
+    // Verificar si hay usuario en sessionStorage
     const usuarioString = sessionStorage.getItem("usuario");
     if (usuarioString) {
       try {
         const usuario = JSON.parse(usuarioString);
-        if (usuario && (usuario.id || usuario.idusuario || usuario.id_usuario)) {
+        if (usuario && usuario.idusuario) {
           tieneSesion = true;
-          console.log("✅ Sesión encontrada en 'usuario'");
         }
       } catch (e) {
         console.warn("Error parsing usuario:", e);
       }
     }
 
-    // 2. Verificar si hay token
+    // Verificar si hay token
     const token = sessionStorage.getItem("token");
     if (token && !tieneSesion) {
       tieneSesion = true;
-      console.log("✅ Sesión encontrada por token");
+      console.log("Sesión encontrada por token");
     }
 
-    // 3. Verificar si hay id directamente (tu intento original)
+    // Verificar si hay id directamente
     const idDirecto = sessionStorage.getItem("id");
     if (idDirecto && !tieneSesion) {
       tieneSesion = true;
-      console.log("✅ Sesión encontrada por 'id' directo");
-    }
-
-    // 4. Verificar si hay currentUserId (usado en tu código)
-    const currentUserId = sessionStorage.getItem("currentUserId");
-    if (currentUserId && !tieneSesion) {
-      tieneSesion = true;
-      console.log("✅ Sesión encontrada por 'currentUserId'");
     }
 
     // Si NO tiene sesión, mostrar bloqueo
     if (!tieneSesion) {
-      console.warn("⚠️ No se encontró sesión válida, bloqueando acceso");
+      console.warn("No se encontró sesión válida, bloqueando acceso");
 
-      // Crear overlay de bloqueo visual
+      // Overlay de bloqueo visual
       const overlayHTML = `
                 <!DOCTYPE html>
                 <html lang="es">
@@ -165,7 +153,7 @@
                 <body>
                     <div class="overlay-container">
                         <div class="spinner"></div>
-                        <h1>🔒 Acceso Restringido</h1>
+                        <h1>Acceso Restringido</h1>
                         <p>Debes iniciar sesión para acceder al panel de administración.</p>
                         
                         <div class="button-group">
@@ -217,7 +205,7 @@
       // Prevenir cualquier ejecución adicional de JavaScript
       throw new Error("Sesión no válida - Redirigiendo a login");
     } else {
-      console.log("✅ Sesión válida detectada, continuando...");
+      console.log("Sesión válida detectada, continuando...");
     }
   }
 })();
@@ -235,14 +223,14 @@ let usuarioActualId = null;
 
 let datosUsuarioActual = null;
 
-// Paso actual del wizard (1, 2 o 3)
+// Pasos del wizard (1, 2 o 3)
 let pasoActual = 1;
 
 // Total de pasos en el wizard
 const TOTAL_PASOS = 3;
 
 // ----------------------------------------------------------------------------
-// 2. FUNCIÓN DE INICIALIZACIÓN (SE EJECUTA CUANDO EL DOM ESTÁ LISTO)
+// FUNCIÓN DE INICIALIZACIÓN (SE EJECUTA CUANDO EL DOM ESTÁ LISTO)
 // ----------------------------------------------------------------------------
 
 $(document).ready(function () {
@@ -271,7 +259,7 @@ $(document).ready(function () {
 });
 
 // ----------------------------------------------------------------------------
-// 3. FUNCIÓN PARA CARGAR EL NOMBRE DEL ADMINISTRADOR
+// FUNCIÓN PARA CARGAR EL NOMBRE DEL ADMINISTRADOR
 // ----------------------------------------------------------------------------
 
 function cargarNombreAdmin() {
@@ -292,27 +280,13 @@ function cargarNombreAdmin() {
       const usuario = JSON.parse(usuarioString);
       //console.log("Usuario parseado:", usuario);
 
-      // Buscar el nombre en diferentes propiedades posibles
+      // Buscar el nombre
       let nombreAdmin = "Admin";
 
       if (usuario.nombre) {
         nombreAdmin = usuario.nombre;
         //console.log("Nombre encontrado en usuario.nombre:", nombreAdmin);
-      } else if (usuario.nombreadmin) {
-        nombreAdmin = usuario.nombreadmin;
-        //console.log("Nombre encontrado en usuario.nombreadmin:", nombreAdmin);
-      } else if (usuario.nombre_admin) {
-        nombreAdmin = usuario.nombre_admin;
-        //console.log("Nombre encontrado en usuario.nombre_admin:", nombreAdmin);
-      } else if (usuario.username) {
-        nombreAdmin = usuario.username;
-        //console.log("Nombre encontrado en usuario.username:", nombreAdmin);
-      } else if (usuario.correo) {
-        // Si solo hay correo, usar la parte antes del @
-        nombreAdmin = usuario.correo.split("@")[0];
-        //console.log("Nombre derivado del correo:", nombreAdmin);
       }
-
       // Guardar el nombre en el elemento HTML
       $("#adminUserName").text(nombreAdmin);
 
@@ -325,7 +299,7 @@ function cargarNombreAdmin() {
 
       return;
     } catch (error) {
-      //console.error("Error al parsear usuario:", error);
+      console.error("Error al parsear usuario:", error);
     }
   }
 
@@ -344,12 +318,6 @@ function cargarNombreAdmin() {
 
         if (payload.nombre) {
           nombreAdmin = payload.nombre;
-        } else if (payload.name) {
-          nombreAdmin = payload.name;
-        } else if (payload.sub) {
-          nombreAdmin = payload.sub; // subject suele ser el username
-        } else if (payload.email) {
-          nombreAdmin = payload.email.split("@")[0];
         }
 
         $("#adminUserName").text(nombreAdmin);
@@ -359,12 +327,6 @@ function cargarNombreAdmin() {
         if (payload.rol) {
           sessionStorage.setItem("userRole", payload.rol);
           //console.log("Rol extraído del token:", payload.rol);
-        } else if (payload.role) {
-          sessionStorage.setItem("userRole", payload.role);
-          //console.log("Rol extraído del token:", payload.role);
-        } else if (payload.tipousuario) {
-          sessionStorage.setItem("userRole", payload.tipousuario);
-          //console.log("Rol extraído del token:", payload.tipousuario);
         }
 
         return;
@@ -412,14 +374,6 @@ async function obtenerPerfilAdmin() {
 
       if (userData.nombre) {
         nombreAdmin = userData.nombre;
-      } else if (userData.nombreadmin) {
-        nombreAdmin = userData.nombreadmin;
-      } else if (userData.nombre_admin) {
-        nombreAdmin = userData.nombre_admin;
-      } else if (userData.username) {
-        nombreAdmin = userData.username;
-      } else if (userData.correo) {
-        nombreAdmin = userData.correo.split("@")[0];
       }
 
       $("#adminUserName").text(nombreAdmin);
@@ -427,13 +381,9 @@ async function obtenerPerfilAdmin() {
       // Guardar rol
       if (userData.rol) {
         sessionStorage.setItem("userRole", userData.rol);
-      } else if (userData.role) {
-        sessionStorage.setItem("userRole", userData.role);
-      } else if (userData.tipousuario) {
-        sessionStorage.setItem("userRole", userData.tipousuario);
       }
     } else {
-      console.warn("No se pudo obtener perfil, usando valor por defecto");
+      console.warn("No se pudo obtener perfil, usando un valor por defecto");
       $("#adminUserName").text("Admin");
     }
   } catch (error) {
@@ -443,7 +393,7 @@ async function obtenerPerfilAdmin() {
 }
 
 // ----------------------------------------------------------------------------
-// 4. FUNCIÓN PARA INICIALIZAR LA TABLA DE REPORTES (DATATABLE)
+// FUNCIÓN PARA INICIALIZAR LA TABLA DE REPORTES (DATATABLE)
 // ----------------------------------------------------------------------------
 
 function inicializarTabla() {
@@ -593,7 +543,7 @@ tabla.on("search.dt order.dt length.dt", function () {
   cursores = {};
 });
 // ----------------------------------------------------------------------------
-// 5. FUNCIÓN PARA CONFIGURAR TODOS LOS EVENT LISTENERS
+// FUNCIÓN PARA CONFIGURAR TODOS LOS EVENT LISTENERS
 // ----------------------------------------------------------------------------
 
 function configurarEventListeners() {
@@ -691,7 +641,7 @@ function configurarEventListeners() {
 }
 
 // ----------------------------------------------------------------------------
-// 6. FUNCIONES DEL WIZARD (NAVEGACIÓN ENTRE PASOS)
+// FUNCIONES DEL WIZARD (NAVEGACIÓN ENTRE PASOS)
 // ----------------------------------------------------------------------------
 
 // Actualizar la vista del wizard según el paso actual
@@ -735,7 +685,7 @@ function actualizarVistaWizard() {
 
 // Manejar el botón "Siguiente"
 async function manejarBotonSiguiente() {
-  // --- PASO 1: VALIDACIÓN DE USUARIO ---
+  // --- VALIDACIÓN DE USUARIO ---
   if (pasoActual === 1) {
     // Obtener los valores de teléfono y correo
     const telefono = $("#phoneLogin").val().trim();
@@ -767,7 +717,7 @@ async function manejarBotonSiguiente() {
       pasoActual = 3;
       actualizarVistaWizard();
     } else {
-      // IMPORTANTE: Pre-cargar teléfono y correo en el Paso 2
+      // Pre-cargar teléfono y correo en el Paso 2
       $("#editNumeroUsuario").val(telefono);
       $("#editCorreo").val(correo);
 
@@ -778,7 +728,7 @@ async function manejarBotonSiguiente() {
       actualizarVistaWizard();
     }
   }
-  // --- PASO 2: REGISTRO DE NUEVO USUARIO ---
+  // --- REGISTRO DE NUEVO USUARIO ---
   else if (pasoActual === 2) {
     // Validar los datos del usuario antes de continuar
     if (!validarDatosUsuario()) {
@@ -810,7 +760,7 @@ function manejarBotonAtras() {
 }
 
 // ----------------------------------------------------------------------------
-// 7. FUNCIONES DE VALIDACIÓN
+// FUNCIONES DE VALIDACIÓN
 // ----------------------------------------------------------------------------
 
 // Validar formato de email
@@ -936,7 +886,7 @@ function validarDatosReporte() {
 }
 
 // ----------------------------------------------------------------------------
-// 8. FUNCIÓN PARA VALIDAR USUARIO EN EL SERVIDOR (MEJORADA)
+// FUNCIÓN PARA VALIDAR USUARIO EN EL SERVIDOR (MEJORADA)
 // ----------------------------------------------------------------------------
 
 async function validarUsuario(telefono, correo) {
@@ -956,21 +906,21 @@ async function validarUsuario(telefono, correo) {
     const userData = await response.json().catch(() => ({}));
 
     // Extracción limpia del ID (buscamos en raíz, en .user o en .data)
-    const idUsuario = userData.idusuario || userData.user?.idusuario || userData.user?.id || userData.data?.idusuario || userData.data?.id;
+    const idUsuario = userData.idusuario || userData.user?.idusuario || userData.data?.idusuario;
 
     if (response.ok && idUsuario) {
-      console.log("✅ Usuario validado, ID:", idUsuario);
+      //console.log("Usuario validado, ID:", idUsuario);
 
-      // Guardamos en sessionStorage de una vez, papu
+      // Guardamos en sessionStorage de una vez
       sessionStorage.setItem("currentUserId", idUsuario);
       usuarioActualId = idUsuario;
 
-      cargarDatosUsuario(userData.user || userData.data || userData);
+      cargarDatosUsuario(userData);
       bloquearCamposUsuario();
       $("#nextBtn").prop("disabled", false).text("Siguiente");
       return true;
     } else {
-      console.log("❌ Usuario no encontrado");
+      //console.log("Usuario no encontrado");
       sessionStorage.removeItem("currentUserId");
       usuarioActualId = null;
 
@@ -984,13 +934,13 @@ async function validarUsuario(telefono, correo) {
       return false;
     }
   } catch (error) {
-    console.error("❌ Error:", error);
+    console.error("Error:", error);
     $("#nextBtn").prop("disabled", false).text("Siguiente");
     return false;
   }
 }
 // ----------------------------------------------------------------------------
-// 9. FUNCIÓN PARA REGISTRAR NUEVO USUARIO (BLINDADA CONTRA NaN)
+// FUNCIÓN PARA REGISTRAR NUEVO USUARIO
 // ----------------------------------------------------------------------------
 
 async function registrarUsuario() {
@@ -1000,9 +950,9 @@ async function registrarUsuario() {
     const adminSession = JSON.parse(sessionStorage.getItem("usuario"));
     console.log(adminSession);
     id = adminSession.id;
-    console.log(adminSession.id)
+    console.log(adminSession.id);
     console.log(typeof adminSession); // debe imprimir "object"
-console.log(adminSession.id);     // debe imprimir el UUID
+    console.log(adminSession.id); // debe imprimir el UUID
 
     console.log(id);
     const nombre = $("#editNombreUsuario").val().trim();
@@ -1028,7 +978,7 @@ console.log(adminSession.id);     // debe imprimir el UUID
       idAdmin: id,
     };
 
-    console.log("📤 Enviando registro:", datosUsuario);
+    //console.log(" Enviando registro:", datosUsuario);
 
     const response = await fetch(`/api/auth/registrar`, {
       method: "POST",
@@ -1042,37 +992,25 @@ console.log(adminSession.id);     // debe imprimir el UUID
     } catch (e) {}
 
     if (response.ok) {
-      console.log("📥 Respuesta servidor:", result);
+      //console.log(" Respuesta servidor:", result);
 
-      // --- 🔍 LÓGICA DE EXTRACCIÓN PROFUNDA DE UUID ---
       let idFinal = null;
 
-      // 1. Intentamos la ruta exacta que vimos en tu log:
+      // Intentamos la ruta exacta que vimos en tu log:
       // result.idusuario.data.idusuario
       if (result.idusuario && result.idusuario.data && result.idusuario.data.idusuario) {
         idFinal = result.idusuario.data.idusuario;
       }
-      // 2. Intentamos rutas alternativas comunes
-      else if (result.idusuario && typeof result.idusuario !== "object") {
-        idFinal = result.idusuario; // Si viniera directo
-      } else if (result.data && result.data.idusuario) {
-        idFinal = result.data.idusuario;
-      } else if (result.id) {
-        idFinal = result.id;
-      }
-
-      // IMPORTANTE: El ID es un string largo, NO lo conviertas a número con parseInt
-
       // SI NO ENCONTRAMOS ID, PROBAMOS MANUALMENTE
       if (!idFinal) {
-        console.warn("⚠️ Estructura desconocida. Buscando manualmente...");
+        console.warn(" Estructura desconocida. Buscando manualmente...");
         const usuarioRecuperado = await obtenerUsuarioPorCredenciales(correo, telefono);
         if (usuarioRecuperado && usuarioRecuperado.idusuario) {
           idFinal = usuarioRecuperado.idusuario;
         }
       }
 
-      console.log("🔍 ID UUID detectado:", idFinal);
+      //console.log("ID UUID detectado:", idFinal);
 
       // --- VALIDACIÓN Y GUARDADO ---
       if (idFinal && typeof idFinal === "string" && idFinal.length > 0) {
@@ -1101,7 +1039,7 @@ console.log(adminSession.id);     // debe imprimir el UUID
           vecesreportado: 0,
         };
 
-        console.log("✅ UUID GUARDADO EN SESSION:", idFinal);
+        //console.log("UUID GUARDADO EN SESSION:", idFinal);
 
         // Limpieza UI
         $("#editVecesReportado").val("0");
@@ -1111,7 +1049,7 @@ console.log(adminSession.id);     // debe imprimir el UUID
         $("#nextBtn").prop("disabled", false).text("Siguiente");
         return true;
       } else {
-        console.error("❌ ERROR: No se pudo extraer el UUID.");
+        console.error("ERROR: No se pudo extraer el UUID.");
         alert("Registro exitoso, pero no se pudo obtener el ID del usuario. Inicia sesión manual.");
         $("#nextBtn").prop("disabled", false).text("Siguiente");
         return false;
@@ -1122,7 +1060,7 @@ console.log(adminSession.id);     // debe imprimir el UUID
       return false;
     }
   } catch (error) {
-    console.error("❌ Error fatal:", error);
+    console.error("Error fatal:", error);
     $("#nextBtn").prop("disabled", false).text("Siguiente");
     return false;
   }
@@ -1149,12 +1087,8 @@ async function obtenerUsuarioPorCredenciales(correo, telefono) {
       const userData = await response.json();
 
       // Buscar ID en diferentes ubicaciones
-      if (userData.idusuario || userData.id) {
-        return { idusuario: userData.idusuario || userData.id };
-      } else if (userData.user?.idusuario) {
-        return { idusuario: userData.user.idusuario };
-      } else if (userData.data?.idusuario) {
-        return { idusuario: userData.data.idusuario };
+      if (userData.idusuario) {
+        return { idusuario: userData.idusuario };
       }
     }
 
@@ -1166,7 +1100,7 @@ async function obtenerUsuarioPorCredenciales(correo, telefono) {
   }
 }
 // ----------------------------------------------------------------------------
-// 10. FUNCIONES PARA CARGAR Y MANIPULAR DATOS DEL USUARIO
+// FUNCIONES PARA CARGAR Y MANIPULAR DATOS DEL USUARIO
 // ----------------------------------------------------------------------------
 
 // Cargar los datos del usuario en los campos del paso 2
@@ -1214,7 +1148,7 @@ function desbloquearCamposUsuario() {
 }
 
 // ----------------------------------------------------------------------------
-// 11. FUNCIONES PARA ABRIR EL MODAL EN DIFERENTES MODOS
+// FUNCIONES PARA ABRIR EL MODAL EN DIFERENTES MODOS
 // ----------------------------------------------------------------------------
 
 // Abrir modal en modo CREAR
@@ -1286,7 +1220,7 @@ async function abrirModalVer(reporteId) {
 }
 
 // ----------------------------------------------------------------------------
-// 12. FUNCIÓN PARA CARGAR REPORTE COMPLETO DESDE EL SERVIDOR
+// FUNCIÓN PARA CARGAR REPORTE COMPLETO DESDE EL SERVIDOR
 // ----------------------------------------------------------------------------
 
 async function cargarReporteCompleto(reporteId) {
@@ -1317,38 +1251,31 @@ async function cargarReporteCompleto(reporteId) {
 }
 
 // ----------------------------------------------------------------------------
-// 13. FUNCIÓN PARA CARGAR DATOS DEL REPORTE EN EL FORMULARIO
+// FUNCIÓN PARA CARGAR DATOS DEL REPORTE EN EL FORMULARIO
 // ----------------------------------------------------------------------------
 
 function cargarDatosReporte(datos) {
   // --- DATOS DEL USUARIO (Paso 2) ---
-  $("#editNombreUsuario").val(datos.nombreusuario || datos.nombre || datos.nombre_usuario || "");
-  $("#editVecesReportado").val(datos.vecesreportado || datos.veces_reportado || 0);
+  $("#editNombreUsuario").val(datos.nombre || "");
+  $("#editVecesReportado").val(datos.vecesreportado || 0);
   $("#editEdad").val(datos.edad || "");
   $("#editSexo").val(datos.sexo || "");
-  $("#editNumeroUsuario").val(datos.numerotelefono || datos.numeroTelefono || datos.telefono || "");
-  $("#editCorreo").val(datos.correousuario || datos.correo || datos.email || "");
+  $("#editNumeroUsuario").val(datos.numerotelefono || datos.numeroTelefono || "");
+  $("#editCorreo").val(datos.email || "");
   $("#editMunicipio").val(datos.municipio || "");
 
-  // Campo Via (nombreadmin) - puede venir con diferentes nombres
-  $("#Via").val(datos.nombreadmin || datos.nombre_admin || datos.admin || "");
+  // Campo Via (nombreadmin)
+  $("#Via").val(datos.nombre || "");
 
   // Guardar el ID del usuario si está disponible (buscando en diferentes nombres de campo)
   if (datos.idusuario) {
     usuarioActualId = datos.idusuario;
-  } else if (datos.idUsuario) {
-    usuarioActualId = datos.idUsuario;
-  } else if (datos.userId) {
-    usuarioActualId = datos.userId;
-  } else if (datos.usuario_id) {
-    usuarioActualId = datos.usuario_id;
   }
-
   // --- DATOS DEL REPORTE (Paso 3) ---
   $("#editNumeroReportado").val(datos.numeroreportado || datos.numeroReportado || "");
 
-  // Formatear la fecha (quitar la hora si viene en formato ISO)
-  let fechaReporte = datos.fechareporte || datos.fechaReporte || datos.fecha_reporte;
+  // Formatear la fecha
+  let fechaReporte = datos.fechareporte || datos.fechaReporte;
   if (fechaReporte) {
     const fechaCorta = fechaReporte.split("T")[0];
     $("#editFechaReporte").val(fechaCorta);
@@ -1356,29 +1283,29 @@ function cargarDatosReporte(datos) {
     $("#editFechaReporte").val("");
   }
 
-  // Categoría - probar diferentes nombres de campo
-  $("#editCategoria").val(datos.categoriareporte || datos.categoriaReporte || datos.categoria || "Extorsión");
+  // Categoría
+  $("#editCategoria").val(datos.categoriareporte || datos.categoriaReporte || "Extorsión");
 
-  // Medio de contacto - probar diferentes nombres de campo
-  $("#editMedioContacto").val(datos.mediocontacto || datos.medioContacto || datos.medio_contacto || "llamada");
+  // Medio de contacto
+  $("#editMedioContacto").val(datos.mediocontacto || datos.medioContacto || "llamada");
 
   // Descripción
   $("#editDescripcion").val(datos.descripcion || "");
 
   // Supuesto nombre
-  $("#editSupuestoNombre").val(datos.supuestonombre || datos.supuestoNombre || datos.supuesto_nombre || "");
+  $("#editSupuestoNombre").val(datos.supuestonombre || datos.supuestoNombre || "");
 
   // Género
-  $("#editSupuestoGenero").val(datos.genero || datos.supuestoGenero || datos.supuesto_genero || "No especificado");
+  $("#editSupuestoGenero").val(datos.genero || datos.supuestoGenero || "No especificado");
 
   // Supuesto trabajo
-  $("#editSupuestoTrabajo").val(datos.supuestotrabajo || datos.supuestoTrabajo || datos.supuesto_trabajo || "");
+  $("#editSupuestoTrabajo").val(datos.supuestotrabajo || datos.supuestoTrabajo || "");
 
   // Estatus
-  $("#editEstatus").val(datos.estatus || datos.status || "Pendiente");
+  $("#editEstatus").val(datos.estatus || "Pendiente");
 
   // --- DATOS DE DESTINO ---
-  const tipoDestino = datos.tipodestino || datos.tipoDestino || datos.tipo_destino || "Ninguno";
+  const tipoDestino = datos.tipodestino || datos.tipoDestino || "Ninguno";
   $("#editTipoDestino").val(tipoDestino).trigger("change"); // Trigger para mostrar/ocultar campos
 
   // Número de tarjeta
@@ -1389,7 +1316,7 @@ function cargarDatosReporte(datos) {
 }
 
 // ----------------------------------------------------------------------------
-// 14. FUNCIÓN PARA BLOQUEAR CAMPOS EN MODO VER
+// FUNCIÓN PARA BLOQUEAR CAMPOS EN MODO VER
 // ----------------------------------------------------------------------------
 
 function bloquearCamposVer() {
@@ -1405,12 +1332,10 @@ function bloquearCamposVer() {
 }
 
 // ----------------------------------------------------------------------------
-// 15. FUNCIÓN PARA LIMPIAR EL MODAL COMPLETAMENTE
+// FUNCIÓN PARA LIMPIAR EL MODAL COMPLETAMENTE
 // ----------------------------------------------------------------------------
 
 function limpiarModal() {
-  // -------------------------------
-
   reporteActualId = null;
   const $formulario = $("#editReportForm");
 
@@ -1418,10 +1343,10 @@ function limpiarModal() {
   if ($formulario.length > 0) {
     $formulario[0].reset();
   } else {
-    console.warn("⚠️ No se encontró el formulario #editReportForm para limpiar.");
+    console.warn("No se encontró el formulario #editReportForm para limpiar.");
   }
 
-  // 3. Resucitar el botón de Atrás
+  // Resucitar el botón de Atrás
   $("#prevBtn").show();
 
   // Limpiar variables de control
@@ -1466,11 +1391,7 @@ function limpiarModal() {
 }
 
 // ----------------------------------------------------------------------------
-// 16. FUNCIÓN PARA GUARDAR EL REPORTE (CREAR O ACTUALIZAR) - CORREGIDA
-// ----------------------------------------------------------------------------
-
-// ----------------------------------------------------------------------------
-// 16. FUNCIÓN PARA GUARDAR EL REPORTE (CREAR O ACTUALIZAR) - CORREGIDA
+// FUNCIÓN PARA GUARDAR EL REPORTE (CREAR O ACTUALIZAR) - CORREGIDA
 // ----------------------------------------------------------------------------
 
 async function guardarReporte() {
@@ -1484,7 +1405,7 @@ async function guardarReporte() {
 
   const datosReporte = construirObjetoReporte(esCrear);
 
-  console.log("📦 Datos reporte ANTES de limpieza:", datosReporte);
+  //console.log("Datos reporte ANTES de limpieza:", datosReporte);
 
   // Validación adicional de campos requeridos SOLO para creación
   // if (esCrear) {
@@ -1505,8 +1426,7 @@ async function guardarReporte() {
     url = `/api/incidencias/modificar/${reporteActualId}`;
     metodo = "PUT";
 
-    // CORREGIDO: NO eliminar tipodestino y otros campos importantes
-    // Solo eliminar campos del usuario que no deberían modificarse
+    // Eliminar campos del usuario que no deberían modificarse
     delete datosReporte.idUsuario;
     delete datosReporte.idusuario;
     delete datosReporte.categoriaReporte;
@@ -1526,29 +1446,20 @@ async function guardarReporte() {
     delete datosReporte.numerotelefono;
     delete datosReporte.correousuario;
     delete datosReporte.municipio;
-
-    // NO eliminar estos campos (son parte del reporte):
-    // delete datosReporte.direccion;       // <-- MANTENER
-    // delete datosReporte.mediocontacto;   // <-- MANTENER
-    // delete datosReporte.numerotarjeta;   // <-- MANTENER
-    // delete datosReporte.numeroreportado; // <-- MANTENER
-    // delete datosReporte.tipodestino;     // <-- ¡ESTE ES EL PROBLEMA!
   }
 
-  // AGREGAR HEADERS DE AUTENTICACIÓN
   const headers = {
     "Content-Type": "application/json",
   };
 
-  // Agregar token si existe
   const token = sessionStorage.getItem("token");
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
   try {
-    console.log(`📤 Enviando ${metodo} a ${url}`);
-    console.log("📦 Datos a enviar:", datosReporte);
+    console.log(`Enviando ${metodo} a ${url}`);
+    console.log("Datos a enviar:", datosReporte);
 
     const response = await fetch(url, {
       method: metodo,
@@ -1578,7 +1489,7 @@ async function guardarReporte() {
     }
 
     const resultado = await response.json();
-    console.log("✅ Respuesta del servidor:", resultado);
+    console.log("Respuesta del servidor:", resultado);
 
     // Cerrar modales y limpiar
     $("#confirmationModal").modal("hide");
@@ -1588,22 +1499,22 @@ async function guardarReporte() {
 
     // Mostrar mensaje de éxito
     setTimeout(() => {
-      alert(`✅ Reporte ${esCrear ? "creado" : "actualizado"} exitosamente`);
+      alert(`Reporte ${esCrear ? "creado" : "actualizado"} exitosamente`);
     }, 300);
   } catch (error) {
-    console.error("❌ Error al guardar:", error);
-    alert(`❌ Error al ${esCrear ? "crear" : "actualizar"} el reporte:\n${error.message}`);
+    console.error("Error al guardar:", error);
+    alert(`Error al ${esCrear ? "crear" : "actualizar"} el reporte:\n${error.message}`);
   }
 }
 
 // ----------------------------------------------------------------------------
-// 17. FUNCIÓN PARA CONSTRUIR EL OBJETO DE DATOS DEL REPORTE (MEJORADA)
+// FUNCIÓN PARA CONSTRUIR EL OBJETO DE DATOS DEL REPORTE (MEJORADA)
 // ----------------------------------------------------------------------------
 
 function construirObjetoReporte(esCrear = true) {
-  console.log(`🔨 Construyendo reporte (${esCrear ? "CREAR" : "MODIFICAR"})`);
+  console.log(`Construyendo reporte (${esCrear ? "CREAR" : "MODIFICAR"})`);
 
-  // --- 1. OBTENCIÓN DEL UUID (SIN PARSEINT) ---
+  // OBTENCIÓN DEL UUID  
   let idFinal = sessionStorage.getItem("currentUserId");
 
   if (!idFinal || idFinal === "undefined" || idFinal === "null") {
@@ -1613,21 +1524,19 @@ function construirObjetoReporte(esCrear = true) {
   // Validación: Que sea string y no sea el mensaje de éxito
   if (esCrear) {
     if (!idFinal || idFinal === "Registro exitoso" || idFinal.length < 5) {
-      console.error("❌ ERROR: UUID inválido:", idFinal);
+      console.error("ERROR: UUID inválido:", idFinal);
       alert("Error: ID de usuario perdido. Recarga la página.");
       return null;
     }
   }
 
-  // --- 2. OBJETO CON CAMPOS EN MINÚSCULAS ---
+  // OBJETO CON CAMPOS EN MINÚSCULAS 
   const datos = {
-    // ⚠️ CAMBIO CLAVE: Mayúsculas intermedias
-    idUsuario: idFinal, // <--- idUsuario (NO idusuario)
-    numeroReportado: $("#editNumeroReportado").val().trim() || null, // <--- numeroReportado
-    categoriaReporte: $("#editCategoria").val() || null, // <--- categoriaReporte
-    medioContacto: $("#editMedioContacto").val() || null, // <--- medioContacto
+    idUsuario: idFinal, 
+    numeroReportado: $("#editNumeroReportado").val().trim() || null, 
+    categoriaReporte: $("#editCategoria").val() || null, 
+    medioContacto: $("#editMedioContacto").val() || null, 
 
-    // El resto igual en CamelCase
     fechaReporte: $("#editFechaReporte").val() || (esCrear ? new Date().toISOString().split("T")[0] : null),
     descripcion: $("#editDescripcion").val().trim() || null,
     supuestoNombre: $("#editSupuestoNombre").val().trim() || null,
@@ -1640,7 +1549,7 @@ function construirObjetoReporte(esCrear = true) {
     direccion: $("#editDireccion").val().trim() || null,
   };
 
-  // --- 3. LIMPIEZA ---
+  // LIMPIEZA
   if (datos.tipoDestino === "Ninguno" || !datos.tipoDestino) {
     datos.tipoDestino = null;
     datos.numeroTarjeta = null;
@@ -1653,11 +1562,11 @@ function construirObjetoReporte(esCrear = true) {
 
   if (!esCrear) delete datos.idUsuario;
 
-  console.log("📤 Datos reporte listos (CamelCase + UUID):", datos);
+  console.log("Datos reporte listos (CamelCase + UUID):", datos);
   return datos;
 }
 // ----------------------------------------------------------------------------
-// 18. FUNCIÓN PARA ELIMINAR EL REPORTE
+// FUNCIÓN PARA ELIMINAR EL REPORTE
 // ----------------------------------------------------------------------------
 
 async function eliminarReporte() {
@@ -1696,7 +1605,7 @@ async function eliminarReporte() {
 }
 
 // ----------------------------------------------------------------------------
-// 19. FUNCIÓN PARA CERRAR SESIÓN
+// FUNCIÓN PARA CERRAR SESIÓN
 // ----------------------------------------------------------------------------
 
 function cerrarSesion(e) {

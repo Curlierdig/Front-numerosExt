@@ -178,8 +178,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       }
 
-      //console.log("📤 Datos a enviar:", JSON.stringify(requestBody, null, 2));
-      //console.log("🔑 User ID:", userId);
+      //console.log("Datos a enviar:", JSON.stringify(requestBody, null, 2));
+      //console.log("User ID:", userId);
       // FETCH POST con mejor manejo de errores
       try {
         const response = await fetch(`/api/incidencias/crear`, {
@@ -193,7 +193,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Obtener la respuesta para debug
         const responseText = await response.text();
-        //console.log("📥 Respuesta del servidor:", responseText);
+        //console.log("Respuesta del servidor:", responseText);
 
         if (!response.ok) {
           let errorDetail = "Error desconocido";
@@ -215,7 +215,7 @@ document.addEventListener("DOMContentLoaded", function () {
           throw new Error(`No se pudo enviar el reporte:\n${errorDetail}`);
         }
 
-        //console.log("✅ Reporte enviado con éxito");
+        //console.log("Reporte enviado con éxito");
 
         reporteModal.hide(); // Cierra el modal
 
@@ -223,7 +223,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         wizardForm.reset();
       } catch (error) {
-        console.error("❌ Error al enviar el reporte:", error);
+        console.error("Error al enviar el reporte:", error);
         alert(error.message);
       } finally {
         // Reactivamos el botón
