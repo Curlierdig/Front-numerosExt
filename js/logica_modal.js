@@ -1032,8 +1032,6 @@ async function registrarUsuario() {
     const result = await response.json().catch(() => ({}));
 
     if (response.ok) {
-      console.log("Ciudadano registrado exitosamente:", result);
-
       // 5. EXTRACCIÓN DEL ID DEL NUEVO USUARIO
       // Buscamos el ID en todas las estructuras posibles que pueda devolver tu API
       const idNuevoUsuario = result.data.idusuario || result.idusuario || result.data?.idusuario || result.data?.id || result.user?.idusuario;
@@ -1063,17 +1061,14 @@ async function registrarUsuario() {
 
         return true; // TRUE = Avanzar al paso 3 (Reporte)
       } else {
+        console.error("Error en registro:", result);
+        const mensajeError = result.mensaje;
+        alert("No se pudo registrar al usuario: " + mensajeError);
         $("#nextBtn").prop("disabled", false).text("Siguiente");
         return false;
       }
     } else {
-      // Error del servidor (ej. "El correo ya existe")
-      console.error("Error en registro:", result);
-      const mensajeError = result.mensaje;
-      alert("No se pudo registrar al usuario: " + mensajeError);
-
-      $("#nextBtn").prop("disabled", false).text("Siguiente");
-      return false;
+      alert("Error de comunicacion, reinicia la pagina");
     }
   } catch (error) {
     console.error("Error fatal en la conexión:", error);
