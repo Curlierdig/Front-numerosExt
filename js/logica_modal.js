@@ -1034,7 +1034,7 @@ async function registrarUsuario() {
     if (response.ok) {
       // 5. EXTRACCIÓN DEL ID DEL NUEVO USUARIO
       // Buscamos el ID en todas las estructuras posibles que pueda devolver tu API
-      const idNuevoUsuario = result.data.idusuario || result.idusuario || result.data?.idusuario || result.data?.id || result.user?.idusuario;
+      const idNuevoUsuario = result.data.idusuario || "";
       console.log(idNuevoUsuario);
       if (idNuevoUsuario && !result.error) {
         // --- ÉXITO ---
