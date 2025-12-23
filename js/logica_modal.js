@@ -923,7 +923,7 @@ async function validarUsuario() {
     const userData = await response.json().catch(() => ({}));
 
     // Buscamos el ID (cubriendo todas las posibilidades donde el backend lo esconda)
-    const idUsuario = userData.idusuario || userData.user?.idusuario || userData.data?.idusuario;
+    const idUsuario = userData.idusuario || userData.id;
 
     // --- ESCENARIO 1: EL USUARIO SÍ EXISTE (LOGIN EXITOSO) ---
     if (response.ok && idUsuario) {
