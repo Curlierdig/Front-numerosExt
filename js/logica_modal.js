@@ -1036,8 +1036,8 @@ async function registrarUsuario() {
 
       // 5. EXTRACCIÓN DEL ID DEL NUEVO USUARIO
       // Buscamos el ID en todas las estructuras posibles que pueda devolver tu API
-      const idNuevoUsuario = result.id || result.idusuario || result.data?.idusuario || result.data?.id || result.user?.idusuario;
-
+      const idNuevoUsuario = result.data.idusuario || result.idusuario || result.data?.idusuario || result.data?.id || result.user?.idusuario;
+      console.log(idNuevoUsuario)
       if (idNuevoUsuario) {
         // --- ÉXITO ---
         // Guardamos el ID del CIUDADANO en 'currentUserId' para usarlo en el reporte
