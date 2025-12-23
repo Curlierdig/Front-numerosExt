@@ -1503,10 +1503,11 @@ function construirObjetoReporte(esCrear = true) {
 
   // OBTENCIÓN DEL UUID
   let idFinal = sessionStorage.getItem("currentUserId");
+  idFinal = idFinal.idUsuario;
 
   if (!idFinal || idFinal === "undefined" || idFinal === "null") {
     //idFinal = usuarioActualId;
-    idFinal = idFinal.id;
+    idFinal = idFinal.idUsuario;
     console.log(idFinal);
   }
 
