@@ -889,54 +889,81 @@ function validarDatosReporte() {
 // FUNCIÓN PARA VALIDAR USUARIO EN EL SERVIDOR (MEJORADA)
 // ----------------------------------------------------------------------------
 
-async function validarUsuario(telefono, correo) {
+async function validarUsuario() {
+  // 1. Agarramos los valores de los inputs que pusiste en tu HTML
+  const telefono = $("#phoneLogin").val().trim();
+  const correo = $("#emailLogin").val().trim();
+
+  // Validación rápida para no mandar nada vacío
+  if (!telefono || !correo) {
+    alert("Eh papu, te faltan datos. Escribe correo y teléfono.");
+    return null; // Retornamos null para saber que ni se intentó
+  }
+
   $("#nextBtn").prop("disabled", true).text("Validando...");
 
   try {
+    // 2. Creamos el FormData (tu backend lo pide así)
     const formData = new FormData();
     formData.append("correo", correo);
+    // OJO AQUÍ: Tu backend espera que la contraseña sea el teléfono, ¿verdad?
+    // Si es así, esto está bien. Si no, avísame.
     formData.append("contrasena", telefono);
 
     const response = await fetch(`/api/auth/login`, {
       method: "POST",
       body: formData,
+      // Nota: Al usar FormData NO necesitas poner headers, el navegador lo hace solo.
       credentials: "include",
     });
 
     const userData = await response.json().catch(() => ({}));
 
-    // Extracción limpia del ID (buscamos en raíz, en .user o en .data)
+    // Buscamos el ID (cubriendo todas las posibilidades donde el backend lo esconda)
     const idUsuario = userData.idusuario || userData.user?.idusuario || userData.data?.idusuario;
 
+    // --- ESCENARIO 1: EL USUARIO SÍ EXISTE (LOGIN EXITOSO) ---
     if (response.ok && idUsuario) {
-      //console.log("Usuario validado, ID:", idUsuario);
+      //console.log("¡Simón! Usuario validado. ID:", idUsuario);
 
-      // Guardamos en sessionStorage de una vez
       sessionStorage.setItem("currentUserId", idUsuario);
       usuarioActualId = idUsuario;
 
-      cargarDatosUsuario(userData);
-      bloquearCamposUsuario();
+      // Cargar info y bloquear campos para que se vea que ya está logueado
+      if (typeof cargarDatosUsuario === "function") cargarDatosUsuario(userData);
+
+      // Bloqueamos los inputs del login para que no le muevan
+      $("#phoneLogin, #emailLogin").prop("disabled", true);
+
       $("#nextBtn").prop("disabled", false).text("Siguiente");
-      return true;
-    } else {
-      //console.log("Usuario no encontrado");
+
+      return true; // TRUE significa: "Ya existe, mándalo al final"
+    }
+
+    // --- ESCENARIO 2: NO EXISTE (TOCA REGISTRAR) ---
+    else {
+      //console.log("Usuario no topado, vamos a registrarlo.");
       sessionStorage.removeItem("currentUserId");
       usuarioActualId = null;
 
-      // Limpiar y preparar para registro
+      // Preparamos los campos del SIGUIENTE paso (Registro)
+      // Limpiamos nombre y edad por si había basura
       $("#editNombreUsuario, #editEdad").val("");
+
+      // Pasamos lo que ya escribió para que no lo vuelva a escribir (UX chida)
       $("#editNumeroUsuario").val(telefono);
       $("#editCorreo").val(correo);
 
-      desbloquearCamposUsuario();
+      if (typeof desbloquearCamposUsuario === "function") desbloquearCamposUsuario();
+
       $("#nextBtn").prop("disabled", false).text("Siguiente");
-      return false;
+
+      return false; // FALSE significa: "No existe, mándalo a registrar"
     }
   } catch (error) {
-    console.error("Error:", error);
-    $("#nextBtn").prop("disabled", false).text("Siguiente");
-    return false;
+    console.error("Chale, error en el server:", error);
+    $("#nextBtn").prop("disabled", false).text("Reintentar");
+    return null; // Error de conexión
   }
 }
 // ----------------------------------------------------------------------------
@@ -1066,39 +1093,6 @@ async function registrarUsuario() {
   }
 }
 
-// ----------------------------------------------------------------------------
-// FUNCIÓN AUXILIAR PARA OBTENER USUARIO POR CREDENCIALES
-// ----------------------------------------------------------------------------
-
-async function obtenerUsuarioPorCredenciales(correo, telefono) {
-  try {
-    // Intentar obtener el usuario que acabamos de registrar
-    // Opción 1: Intentar login para obtener ID
-    const formData = new FormData();
-    formData.append("correo", correo);
-    formData.append("contrasena", telefono); // Usar teléfono como contraseña
-
-    const response = await fetch(`/api/auth/login`, {
-      method: "POST",
-      body: formData,
-    });
-
-    if (response.ok) {
-      const userData = await response.json();
-
-      // Buscar ID en diferentes ubicaciones
-      if (userData.idusuario) {
-        return { idusuario: userData.idusuario };
-      }
-    }
-
-    // Si no funciona, retornar null
-    return null;
-  } catch (error) {
-    console.warn("Error al obtener usuario por credenciales:", error);
-    return null;
-  }
-}
 // ----------------------------------------------------------------------------
 // FUNCIONES PARA CARGAR Y MANIPULAR DATOS DEL USUARIO
 // ----------------------------------------------------------------------------
@@ -1514,7 +1508,7 @@ async function guardarReporte() {
 function construirObjetoReporte(esCrear = true) {
   console.log(`Construyendo reporte (${esCrear ? "CREAR" : "MODIFICAR"})`);
 
-  // OBTENCIÓN DEL UUID  
+  // OBTENCIÓN DEL UUID
   let idFinal = sessionStorage.getItem("currentUserId");
 
   if (!idFinal || idFinal === "undefined" || idFinal === "null") {
@@ -1530,12 +1524,12 @@ function construirObjetoReporte(esCrear = true) {
     }
   }
 
-  // OBJETO CON CAMPOS EN MINÚSCULAS 
+  // OBJETO CON CAMPOS EN MINÚSCULAS
   const datos = {
-    idUsuario: idFinal, 
-    numeroReportado: $("#editNumeroReportado").val().trim() || null, 
-    categoriaReporte: $("#editCategoria").val() || null, 
-    medioContacto: $("#editMedioContacto").val() || null, 
+    idUsuario: idFinal,
+    numeroReportado: $("#editNumeroReportado").val().trim() || null,
+    categoriaReporte: $("#editCategoria").val() || null,
+    medioContacto: $("#editMedioContacto").val() || null,
 
     fechaReporte: $("#editFechaReporte").val() || (esCrear ? new Date().toISOString().split("T")[0] : null),
     descripcion: $("#editDescripcion").val().trim() || null,

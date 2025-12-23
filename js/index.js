@@ -219,7 +219,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         reporteModal.hide(); // Cierra el modal
 
-        alert("¡Reporte enviado con éxito! Gracias por tu colaboración.");
+        alert("Reporte enviado con éxito! Gracias por tu colaboración.");
 
         wizardForm.reset();
       } catch (error) {
