@@ -1508,7 +1508,7 @@ function construirObjetoReporte(esCrear = true) {
   if (!idFinal || idFinal === "undefined" || idFinal === "null") {
     // Si usuarioActualId es un objeto, sacamos el ID, si es texto, lo usamos directo
     if (usuarioActualId && typeof usuarioActualId === "object") {
-      idFinal = usuarioActualId.id || usuarioActualId.idusuario;
+      idFinal = usuarioActualId.idusuario;
     } else {
       idFinal = usuarioActualId;
     }
@@ -1519,7 +1519,7 @@ function construirObjetoReporte(esCrear = true) {
     console.warn("ID corrupto detectado. Intentando limpiar...");
     // Si tenemos el objeto global con datos, lo rescatamos de ahí
     if (datosUsuarioActual && datosUsuarioActual.id) {
-      idFinal = datosUsuarioActual.id;
+      idFinal = datosUsuarioActual.idusuario;
     } else {
       idFinal = null; // No se pudo rescatar
     }
