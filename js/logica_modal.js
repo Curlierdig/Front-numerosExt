@@ -970,33 +970,45 @@ async function validarUsuario() {
   }
 }
 // ----------------------------------------------------------------------------
-// FUNCIÓN PARA REGISTRAR NUEVO USUARIO
+// FUNCIÓN PARA REGISTRAR NUEVO USUARIO (CIUDADANO)
 // ----------------------------------------------------------------------------
 
 async function registrarUsuario() {
   $("#nextBtn").prop("disabled", true).text("Registrando...");
 
   try {
-    const adminSession = JSON.parse(sessionStorage.getItem("usuario"));
-    console.log(adminSession);
-    id = adminSession.id;
-    console.log(adminSession.id);
-    console.log(typeof adminSession); // debe imprimir "object"
-    console.log(adminSession.id); // debe imprimir el UUID
+    // 1. OBTENER EL ID DEL ADMIN (EL QUE ESTÁ OPERANDO)
+    // Este ID es solo para saber QUIÉN hizo el registro
+    let idAdminQueRegistra = null;
+    try {
+      const adminSession = JSON.parse(sessionStorage.getItem("usuario"));
+      // Buscamos el ID del admin en su sesión actual
+      idAdminQueRegistra = adminSession?.id || adminSession?.idusuario;
+    } catch (e) {
+      console.warn("No se detectó sesión de admin, se enviará sin ID de creador.");
+    }
 
-    console.log(id);
+    // 2. OBTENER DATOS DEL CIUDADANO (DESDE EL FORMULARIO)
     const nombre = $("#editNombreUsuario").val().trim();
-    // Validamos edad (si viene vacía ponemos 0)
+
+    // Validamos edad
     const edadVal = $("#editEdad").val();
     const edad = edadVal ? parseInt(edadVal) : 0;
 
     const sexo = $("#editSexo").val();
-    const telefono = $("#phoneLogin").val().trim();
-    const correo = $("#emailLogin").val().trim();
-    let municipio = $("#editMunicipio").val();
-    if (municipio === "otro") municipio = $("#otroMunicipioInput").val().trim() || "No especificado";
 
-    const datosUsuario = {
+    // Usamos los inputs del paso 2 por si corrigieron el dato al escribirlo
+    // Si están vacíos, usamos los del login (fallback)
+    const telefono = $("#editNumeroUsuario").val().trim() || $("#phoneLogin").val().trim();
+    const correo = $("#editCorreo").val().trim() || $("#emailLogin").val().trim();
+
+    let municipio = $("#editMunicipio").val();
+    if (municipio === "otro") {
+      municipio = $("#otroMunicipioInput").val().trim() || "No especificado";
+    }
+
+    // 3. CONSTRUIR EL OBJETO (DATOS DEL USUARIO + FIRMA DEL ADMIN)
+    const datosNuevoUsuario = {
       correo: correo,
       numeroTelefono: telefono,
       nombre: nombre,
@@ -1004,61 +1016,35 @@ async function registrarUsuario() {
       sexo: sexo,
       municipio: municipio,
       entidadForanea: "Chihuahua",
-      contrasena: telefono,
-      idAdmin: id,
+      contrasena: telefono, // La contraseña inicial es su teléfono
+      idAdmin: idAdminQueRegistra, // Aquí va el ID del Admin que está en el panel
     };
 
-    //console.log(" Enviando registro:", datosUsuario);
+    console.log("Enviando registro de ciudadano:", datosNuevoUsuario);
 
+    // 4. PETICIÓN AL SERVIDOR
     const response = await fetch(`/api/auth/registrar`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(datosUsuario),
+      body: JSON.stringify(datosNuevoUsuario),
     });
 
-    let result = {};
-    try {
-      result = await response.json();
-    } catch (e) {}
+    const result = await response.json().catch(() => ({}));
 
     if (response.ok) {
-      //console.log(" Respuesta servidor:", result);
+      console.log("Ciudadano registrado exitosamente:", result);
 
-      let idFinal = null;
+      // 5. EXTRACCIÓN DEL ID DEL NUEVO USUARIO
+      // Buscamos el ID en todas las estructuras posibles que pueda devolver tu API
+      const idNuevoUsuario = result.id || result.idusuario || result.data?.idusuario || result.data?.id || result.user?.idusuario;
 
-      // Intentamos la ruta exacta que vimos en tu log:
-      // result.idusuario.data.idusuario
-      if (result.idusuario && result.idusuario.data && result.idusuario.data.idusuario) {
-        idFinal = result.idusuario.data.idusuario;
-      }
-      // SI NO ENCONTRAMOS ID, PROBAMOS MANUALMENTE
-      if (!idFinal) {
-        console.warn(" Estructura desconocida. Buscando manualmente...");
-        const usuarioRecuperado = await obtenerUsuarioPorCredenciales(correo, telefono);
-        if (usuarioRecuperado && usuarioRecuperado.idusuario) {
-          idFinal = usuarioRecuperado.idusuario;
-        }
-      }
+      if (idNuevoUsuario) {
+        // --- ÉXITO ---
+        // Guardamos el ID del CIUDADANO en 'currentUserId' para usarlo en el reporte
+        usuarioActualId = idNuevoUsuario;
+        sessionStorage.setItem("currentUserId", idNuevoUsuario);
 
-      //console.log("ID UUID detectado:", idFinal);
-
-      // --- VALIDACIÓN Y GUARDADO ---
-      if (idFinal && typeof idFinal === "string" && idFinal.length > 0) {
-        usuarioActualId = idFinal;
-        sessionStorage.setItem("currentUserId", idFinal); // Guardamos el UUID tal cual
-
-        // Respaldo
-        sessionStorage.setItem(
-          "usuarioRecienRegistrado",
-          JSON.stringify({
-            id: idFinal,
-            nombre,
-            correo,
-            telefono,
-          })
-        );
-
-        // Actualizamos datos globales
+        // Actualizamos los datos globales para que el reporte se llene solo
         datosUsuarioActual = {
           nombreusuario: nombre,
           edad,
@@ -1069,28 +1055,32 @@ async function registrarUsuario() {
           vecesreportado: 0,
         };
 
-        //console.log("UUID GUARDADO EN SESSION:", idFinal);
-
-        // Limpieza UI
+        // UI: Bloqueamos campos y preparamos botón
         $("#editVecesReportado").val("0");
-        $("#editNumeroUsuario").val(telefono);
-        $("#editCorreo").val(correo);
         bloquearCamposUsuario();
+
         $("#nextBtn").prop("disabled", false).text("Siguiente");
-        return true;
+
+        return true; // TRUE = Avanzar al paso 3 (Reporte)
       } else {
-        console.error("ERROR: No se pudo extraer el UUID.");
-        alert("Registro exitoso, pero no se pudo obtener el ID del usuario. Inicia sesión manual.");
+        // Se registró pero no trajo ID (Raro, pero manejado)
+        console.warn("Usuario registrado pero no se obtuvo el ID en la respuesta.");
+        alert("El usuario se registró, pero hubo un error obteniendo su ID. Intenta buscarlo manualmente.");
         $("#nextBtn").prop("disabled", false).text("Siguiente");
         return false;
       }
     } else {
-      alert("Error del servidor: " + (result.mensaje || "Desconocido"));
+      // Error del servidor (ej. "El correo ya existe")
+      console.error("Error en registro:", result);
+      const mensajeError = result.mensaje || result.detail || result.error || "Error desconocido al registrar.";
+      alert("No se pudo registrar al usuario: " + mensajeError);
+
       $("#nextBtn").prop("disabled", false).text("Siguiente");
       return false;
     }
   } catch (error) {
-    console.error("Error fatal:", error);
+    console.error("Error fatal en la conexión:", error);
+    alert("Error de conexión. Revisa tu internet o contacta a sistemas.");
     $("#nextBtn").prop("disabled", false).text("Siguiente");
     return false;
   }
