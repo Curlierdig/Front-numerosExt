@@ -1501,28 +1501,44 @@ async function guardarReporte() {
 function construirObjetoReporte(esCrear = true) {
   console.log(`Construyendo reporte (${esCrear ? "CREAR" : "MODIFICAR"})`);
 
-  // OBTENCIÓN DEL UUID
+  // 1. INTENTAMOS SACAR EL ID DE SESSION STORAGE
   let idFinal = sessionStorage.getItem("currentUserId");
-  idFinal = idFinal.idUsuario;
 
+  // 2. SI NO ESTÁ EN SESSION, BUSCAMOS EN LA VARIABLE GLOBAL
   if (!idFinal || idFinal === "undefined" || idFinal === "null") {
-    //idFinal = usuarioActualId;
-    idFinal = idFinal.idUsuario;
-    console.log(idFinal);
+    // Si usuarioActualId es un objeto, sacamos el ID, si es texto, lo usamos directo
+    if (usuarioActualId && typeof usuarioActualId === "object") {
+      idFinal = usuarioActualId.id || usuarioActualId.idusuario;
+    } else {
+      idFinal = usuarioActualId;
+    }
   }
 
-  // Validación: Que sea string y no sea el mensaje de éxito
+  // 3. LIMPIEZA DE BASURA (Por si quedó guardado [object Object])
+  if (idFinal === "[object Object]") {
+    console.warn("ID corrupto detectado. Intentando limpiar...");
+    // Si tenemos el objeto global con datos, lo rescatamos de ahí
+    if (datosUsuarioActual && datosUsuarioActual.id) {
+      idFinal = datosUsuarioActual.id;
+    } else {
+      idFinal = null; // No se pudo rescatar
+    }
+  }
+
+  console.log("🆔 UUID Detectado:", idFinal);
+
+  // Validación: Que sea string y no sea basura
   if (esCrear) {
-    if (!idFinal || idFinal === "Registro exitoso" || idFinal.length < 5) {
-      console.error("ERROR: UUID inválido:", idFinal);
-      alert("Error: ID de usuario perdido. Recarga la página.");
+    if (!idFinal || typeof idFinal !== "string" || idFinal.length < 5) {
+      console.error("ERROR: No hay ID válido para el reporte.", idFinal);
+      alert("Error: No se ha detectado el usuario. Por favor recarga la página e intenta de nuevo.");
       return null;
     }
   }
 
   // OBJETO CON CAMPOS EN MINÚSCULAS
   const datos = {
-    idUsuario: idFinal,
+    idUsuario: idFinal, // Aquí va el UUID limpio
     numeroReportado: $("#editNumeroReportado").val().trim() || null,
     categoriaReporte: $("#editCategoria").val() || null,
     medioContacto: $("#editMedioContacto").val() || null,
@@ -1539,7 +1555,7 @@ function construirObjetoReporte(esCrear = true) {
     direccion: $("#editDireccion").val().trim() || null,
   };
 
-  // LIMPIEZA
+  // LIMPIEZA CONDICIONAL
   if (datos.tipoDestino === "Ninguno" || !datos.tipoDestino) {
     datos.tipoDestino = null;
     datos.numeroTarjeta = null;
@@ -1552,7 +1568,7 @@ function construirObjetoReporte(esCrear = true) {
 
   if (!esCrear) delete datos.idUsuario;
 
-  console.log("Datos reporte listos (CamelCase + UUID):", datos);
+  console.log("Datos reporte listos:", datos);
   return datos;
 }
 // ----------------------------------------------------------------------------
