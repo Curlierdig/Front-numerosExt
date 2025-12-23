@@ -1034,7 +1034,7 @@ async function registrarUsuario() {
     if (response.ok) {
       // 5. EXTRACCIÓN DEL ID DEL NUEVO USUARIO
       // Buscamos el ID en todas las estructuras posibles que pueda devolver tu API
-      if (response.data.idusuario){
+      if (result.data.idusuario){
         idNuevoUsuario = result.data.idusuario;
       }
       if (idNuevoUsuario != null && !result.error) {
