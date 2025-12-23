@@ -1505,7 +1505,9 @@ function construirObjetoReporte(esCrear = true) {
   let idFinal = sessionStorage.getItem("currentUserId");
 
   if (!idFinal || idFinal === "undefined" || idFinal === "null") {
-    idFinal = usuarioActualId;
+    
+    //idFinal = usuarioActualId;
+    idFinal = idFinal.id;
   }
 
   // Validación: Que sea string y no sea el mensaje de éxito
