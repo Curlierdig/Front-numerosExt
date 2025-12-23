@@ -6,7 +6,7 @@
     if (usuarioString) {
       try {
         const usuario = JSON.parse(usuarioString);
-        if (usuario && usuario.idusuario) {
+        if (usuario && (usuario.idusuario || usuario.id)) {
           tieneSesion = true;
         }
       } catch (e) {
@@ -24,6 +24,11 @@
     // Verificar si hay id directamente
     const idDirecto = sessionStorage.getItem("id");
     if (idDirecto && !tieneSesion) {
+      tieneSesion = true;
+    }
+
+    const currentUserId = sessionStorage.getItem("currentUserId");
+    if (currentUserId && !tieneSesion) {
       tieneSesion = true;
     }
 
@@ -157,7 +162,7 @@
                         <p>Debes iniciar sesión para acceder al panel de administración.</p>
                         
                         <div class="button-group">
-                            <a href="/front/loginAdmin.html" class="btn">Ir al Login</a>
+                            <a href="/front/loginAdmin" class="btn">Ir al Login</a>
                             <button onclick="location.reload()" class="btn btn-secondary">Reintentar</button>
                         </div>
                         
@@ -185,13 +190,13 @@
                             }
                             if (seconds <= 0) {
                                 clearInterval(countdownInterval);
-                                window.location.replace("/front/loginAdmin.html");
+                                window.location.replace("/front/loginAdmin");
                             }
                         }, 1000);
                         
                         // Redirección automática después de 5 segundos
                         setTimeout(() => {
-                            window.location.replace("/front/loginAdmin.html");
+                            window.location.replace("/front/loginAdmin");
                         }, 5000);
                     </script>
                 </body>
@@ -459,7 +464,7 @@ function inicializarTabla() {
           sessionStorage.clear();
           setTimeout(() => {
             alert("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.");
-            window.location.href = "/front/loginAdmin.html";
+            window.location.href = "/front/loginAdmin";
           }, 100);
         }
       },
@@ -896,7 +901,7 @@ async function validarUsuario() {
 
   // Validación rápida para no mandar nada vacío
   if (!telefono || !correo) {
-    alert("Eh papu, te faltan datos. Escribe correo y teléfono.");
+    alert("Faltan datos. Escribe correo y teléfono.");
     return null; // Retornamos null para saber que ni se intentó
   }
 
@@ -906,8 +911,6 @@ async function validarUsuario() {
     // 2. Creamos el FormData (tu backend lo pide así)
     const formData = new FormData();
     formData.append("correo", correo);
-    // OJO AQUÍ: Tu backend espera que la contraseña sea el teléfono, ¿verdad?
-    // Si es así, esto está bien. Si no, avísame.
     formData.append("contrasena", telefono);
 
     const response = await fetch(`/api/auth/login`, {
